@@ -7,11 +7,12 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 
 object Retrofit {
-    private const val BASE_URL = "https://jsonplaceholder.typicode.com/"
+    private const val BASE_URL = "https://ellion.gigalixirapp.com/api/"
 
-    fun getClient(): Retrofit =
+    fun getClient() =
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(Json.asConverterFactory("application/json; charset=UTF8".toMediaType()))
             .build()
+            .create(UserApi::class.java)
 }
