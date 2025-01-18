@@ -42,7 +42,7 @@ android {
         compose = true
     }
     room {
-      schemaDirectory("$projectDir/schemas")
+        schemaDirectory("$projectDir/schemas")
     }
 }
 
@@ -82,7 +82,6 @@ dependencies {
     kspAndroidTest(libs.room.compiler)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
-    implementation(libs.retrofit.converter)
     implementation(libs.retrofit.converter)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)

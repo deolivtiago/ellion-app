@@ -11,11 +11,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object TodoModule {
+object UserModule {
 
     @Singleton
     @Provides
-    fun provideTodoDatabase(@ApplicationContext context: Context): TodoDatabase {
+    fun provideUserDatabase(@ApplicationContext context: Context): UserDatabase {
         val databaseName =
             context
                 .applicationContext
@@ -24,13 +24,13 @@ object TodoModule {
                 .toString()
 
         return Room
-            .databaseBuilder(context.applicationContext, TodoDatabase::class.java, databaseName)
+            .databaseBuilder(context.applicationContext, UserDatabase::class.java, databaseName)
             .fallbackToDestructiveMigration()
             .build()
     }
 
     @Provides
-    fun provideTodoDao(database: TodoDatabase): TodoDao {
-        return database.todoDao
+    fun provideUserDao(database: UserDatabase): UserDao {
+        return database.userDao
     }
 }
