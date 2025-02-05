@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.clarxlabs.ellion.todos.data.remote.Retrofit
+import com.clarxlabs.ellion.todos.data.remote.UserApiService
 import com.clarxlabs.ellion.ui.theme.EllionTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,23 +52,12 @@ fun HomeView(modifier: Modifier = Modifier) {
                 .padding(vertical = 8.dp),
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val response = Retrofit.getClient().listUsers()
+                    val users = UserApiService().listUsers()
                     Log.d(
                         ":::",
-                        "onCreate: ${
-                            response.toString()
-                        }"
+                        "onCreate: $users"
                     )
-                    if (response.isSuccessful) {
-                        launch(Dispatchers.Main) {
-                            Log.d(
-                                ":::",
-                                "onCreate: ${
-                                    response.body().toString()
-                                }"
-                            )
-                        }
-                    }
+
                 }
 
             },
