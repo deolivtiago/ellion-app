@@ -1,0 +1,27 @@
+package com.clarxlabs.ellion.auth.domain
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class User(
+    @SerialName("id")
+    val id: String,
+
+    @SerialName("first_name")
+    val firstName: String,
+
+    @SerialName("last_name")
+    val lastName: String,
+
+    @SerialName("email")
+    val email: String,
+
+    @SerialName("is_verified")
+    val isVerified: Boolean,
+
+    @SerialName("avatar_url")
+    val avatarUrl: String,
+    @SerialName("role")
+    val role: String,
+)

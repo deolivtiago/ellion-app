@@ -1,8 +1,10 @@
-package com.clarxlabs.ellion.auth.ui.components
+package com.clarxlabs.ellion.auth.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,33 +18,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.clarxlabs.ellion.ui.theme.EllionTheme
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun BottomLink(
+fun QuestionButton(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    actionDescription: String = "Don't you have an account?",
-    actionTitle: String = "SIGN UP",
+    onClick: () -> Unit = {},
+    questionText: String = "?",
+    actionTitle: String = "OK",
     horizontalArrangement: Arrangement.HorizontalOrVertical = Arrangement.Center,
-    verticalArrangement: Arrangement.Vertical = Arrangement.Center
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
 ) {
-    FlowRow(
+    Row(
         modifier = modifier,
         horizontalArrangement = horizontalArrangement,
-        verticalArrangement = verticalArrangement,
+        verticalAlignment = verticalAlignment,
     ) {
         Text(
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .padding(horizontal = 8.dp),
-            text = actionDescription,
-            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(start = 8.dp, end = 0.dp, top = 0.dp, bottom = 0.dp),
+            text = questionText,
+            style = MaterialTheme.typography.bodyLarge,
         )
-        TextButton(onClick = onClick) {
+        TextButton(
+            modifier = Modifier.height(32.dp),
+            onClick = onClick,
+            shape = MaterialTheme.shapes.small,
+            contentPadding = PaddingValues(horizontal = 8.dp)
+        ) {
             Text(
                 text = actionTitle,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                )
             )
 
         }
@@ -55,7 +60,7 @@ fun BottomLink(
 fun BottomLinkPreview() {
     EllionTheme {
         Surface {
-            BottomLink(onClick = {})
+            QuestionButton(onClick = {})
         }
     }
 }

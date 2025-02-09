@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.auth.ui
+package com.clarxlabs.ellion.auth.presentation.signup
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

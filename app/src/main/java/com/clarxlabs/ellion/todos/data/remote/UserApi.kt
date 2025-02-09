@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class JsonData<T>(
-    @SerialName("data")
+    @SerialName("domain")
     val data: T
 )
 

@@ -1,11 +1,13 @@
-package com.clarxlabs.ellion.auth.ui.components
+package com.clarxlabs.ellion.auth.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -19,9 +21,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.clarxlabs.ellion.ui.theme.EllionTheme
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TermsAndPolicies(
+    onTermsClicked: () -> Unit = {},
+    onPoliciesClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
     verticalArrangement: Arrangement.Vertical = Arrangement.Center,
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
@@ -33,48 +36,50 @@ fun TermsAndPolicies(
     ) {
         Text(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = "By clicking in next, you agree to our",
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
+            text = "Ao continuar, você está aceitando nossos",
+            style = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center)
         )
-        FlowRow(
+        Row(
             horizontalArrangement = Arrangement.Center,
-            verticalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(
                 modifier = Modifier.height(28.dp),
-                onClick = {},
+                onClick = onTermsClicked,
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 4.dp),
+                shape = MaterialTheme.shapes.small,
             ) {
                 Text(
-                    text = "Terms of Use",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Termos de Uso",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                    ),
                 )
             }
             Text(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                text = "and",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(0.dp),
+                text = "e",
+                style = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
             )
             TextButton(
                 modifier = Modifier.height(28.dp),
-                onClick = {},
+                onClick = onPoliciesClicked,
                 contentPadding = PaddingValues(vertical = 0.dp, horizontal = 4.dp),
-
-                ) {
+                shape = MaterialTheme.shapes.small,
+            ) {
                 Text(
-                    text = "Privacy Policy",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Política de Privacidade",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
                 )
             }
         }
     }
-//    }
 }
 
 @Preview()

@@ -1,10 +1,6 @@
-package com.clarxlabs.ellion
+package com.clarxlabs.ellion.views
 
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,27 +32,13 @@ import com.clarxlabs.ellion.auth.presentation.components.QuestionButton
 import com.clarxlabs.ellion.auth.presentation.components.TermsAndPolicies
 import com.clarxlabs.ellion.todos.data.remote.UserApiService
 import com.clarxlabs.ellion.ui.theme.EllionTheme
-import com.clarxlabs.ellion.views.SignUpViewContent
+import com.clarxlabs.ellion.views.components.FilledButton
+import com.clarxlabs.ellion.views.components.FormHeader
+import com.clarxlabs.ellion.views.components.SignInFormFields
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            EllionTheme {
-//                SignInView(viewModel = SignInViewModel())
-                SignUpViewContent()
-            }
-
-        }
-
-    }
-
-
-}
 
 @Composable
 fun SignInViewContent() {
@@ -66,12 +48,12 @@ fun SignInViewContent() {
             .fillMaxSize(),
     ) {
         Column(
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.primary)
                 .imePadding(),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(
                 modifier = Modifier
@@ -80,88 +62,47 @@ fun SignInViewContent() {
                     .weight(3f)
             )
             Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .widthIn(max = 480.dp)
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-//                    .clip(MaterialTheme.shapes.large)
-//                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 64.dp))
                     .clip(
                         RoundedCornerShape(
-                            topStart = 16.dp,
+                            topStart = 4.dp,
                             topEnd = 64.dp,
-                            bottomStart = 32.dp,
+                            bottomStart = 64.dp,
                             bottomEnd = 4.dp,
                         )
                     )
                     .background(MaterialTheme.colorScheme.background)
                     .padding(bottom = 32.dp, start = 16.dp, end = 16.dp, top = 64.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Acesse sua conta",
-                        style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.SemiBold)
-                    )
-                }
+                FormHeader(title = "Acesse sua conta")
+
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                    QuestionButton(
-                        modifier = Modifier.align(Alignment.End),
-                        questionText = "",
-                        actionTitle = "Precisa de ajuda?",
-                    )
-                    QuestionButton(
-                        modifier = Modifier.align(Alignment.End),
-                        questionText = "Esqueceu a senha?",
-                        actionTitle = "RECUPERAR",
-                    )
-                }
-                Column {
-                    TextField(
-                        shape = MaterialTheme.shapes.extraSmall,
-
-                        value = "",
-                        onValueChange = { },
-                        label = { Text("Email") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp),
-                    )
-
-                    OutlinedTextField(
-                        shape = MaterialTheme.shapes.large,
-                        value = "",
-                        onValueChange = { },
-                        label = { Text("Senha") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp),
-                    )
-                }
-
-                Button(
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val users = UserApiService().listUsers()
-                            Log.d(
-                                ":::", "onCreate: $users"
-                            )
-                        }
-                    },
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = "PRÓXIMO",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                    QuestionButton(
+                        questionText = "Precisa de ajuda?",
+                        actionTitle = "Entrar em contato",
+                        modifier = Modifier.align(Alignment.End),
+                    )
+                    QuestionButton(
+                        modifier = Modifier.align(Alignment.End),
+                        questionText = "Esqueceu sua senha?",
+                        actionTitle = "Recuperar",
                     )
                 }
+
+                SignInFormFields()
+
+                FilledButton()
+
                 TermsAndPolicies()
+
                 QuestionButton(
                     questionText = "Não possui cadastro?",
                     actionTitle = "CADASTRAR"
