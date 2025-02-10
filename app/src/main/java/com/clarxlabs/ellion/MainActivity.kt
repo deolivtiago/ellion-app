@@ -40,22 +40,26 @@ import com.clarxlabs.ellion.views.SignUpViewContent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.compose.KoinApplication
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            EllionTheme {
-//                SignInView(viewModel = SignInViewModel())
-                SignUpViewContent()
-            }
-
-        }
-
+        setContent { MainApp() }
     }
+}
 
-
+@Composable
+fun MainApp() {
+    KoinApplication(
+        application = { modules() }
+    ) {
+        EllionTheme {
+//                SignInView(viewModel = SignInViewModel())
+            SignUpViewContent()
+        }
+    }
 }
 
 @Composable
@@ -108,7 +112,7 @@ fun SignInViewContent() {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                ) {
                     QuestionButton(
                         modifier = Modifier.align(Alignment.End),
                         questionText = "",
