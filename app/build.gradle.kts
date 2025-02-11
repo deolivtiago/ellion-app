@@ -99,4 +99,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines)
     implementation(libs.slf4j.android)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.material.icons.extended)
 }
