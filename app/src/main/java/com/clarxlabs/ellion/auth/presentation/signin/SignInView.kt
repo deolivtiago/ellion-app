@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.auth.signin
+package com.clarxlabs.ellion.auth.presentation.signin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,26 +23,31 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.clarxlabs.ellion.auth.components.FilledButton
-import com.clarxlabs.ellion.auth.components.FormHeader
-import com.clarxlabs.ellion.auth.components.QuestionButton
-import com.clarxlabs.ellion.auth.components.SignInFormFields
-import com.clarxlabs.ellion.auth.components.TermsAndPolicies
-import com.clarxlabs.ellion.ui.theme.EllionTheme
+import com.clarxlabs.ellion.application.config.NavRoute
+import com.clarxlabs.ellion.application.theme.EllionTheme
+import com.clarxlabs.ellion.auth.presentation.components.FilledButton
+import com.clarxlabs.ellion.auth.presentation.components.FormHeader
+import com.clarxlabs.ellion.auth.presentation.components.QuestionButton
+import com.clarxlabs.ellion.auth.presentation.components.SignInFormFields
+import com.clarxlabs.ellion.auth.presentation.components.TermsAndPolicies
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SignInView(viewModel: SignInViewModel = koinViewModel<SignInViewModel>()) {
+fun SignInView(
+    viewModel: SignInViewModel = koinViewModel<SignInViewModel>(),
+    onNavigate: (NavRoute) -> Unit
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val onEvent = viewModel::onEvent
 
-    SignInViewContent(state, onEvent)
+    SignInViewContent(state, onEvent, onNavigate)
 }
 
 @Composable
 fun SignInViewContent(
     state: SignInModelState,
     onEvent: (SignInModelEvent) -> Unit,
+    onNavigate: (NavRoute) -> Unit,
 ) {
     Surface(
         modifier = Modifier
@@ -72,16 +77,16 @@ fun SignInViewContent(
                     .verticalScroll(rememberScrollState())
                     .clip(
                         RoundedCornerShape(
+                            topEnd = 32.dp,
+                            bottomStart = 32.dp,
                             topStart = 4.dp,
-                            topEnd = 64.dp,
-                            bottomStart = 64.dp,
                             bottomEnd = 4.dp,
                         )
                     )
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(bottom = 32.dp, start = 16.dp, end = 16.dp, top = 64.dp),
+                    .padding(bottom = 16.dp, top = 32.dp, start = 16.dp, end = 16.dp),
             ) {
-                FormHeader(title = "Acesse sua conta")
+                FormHeader(title = "Acessar Cadastro")
 
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -104,8 +109,10 @@ fun SignInViewContent(
 
                 SignInFormFields(
                     email = state.email,
+                    emailErrorMessage = state.emailErrorMessage,
                     onEmailChanged = { onEvent(SignInModelEvent.OnEmailChanged(it)) },
                     password = state.password,
+                    passwordErrorMessage = state.passwordErrorMessage,
                     onPasswordChanged = { onEvent(SignInModelEvent.OnPasswordChanged(it)) },
                     isPasswordVisible = state.isPasswordVisible,
                     onPasswordVisibilityClicked = { onEvent(SignInModelEvent.OnPasswordVisibilityClicked) },
@@ -117,12 +124,15 @@ fun SignInViewContent(
                     isLoading = state.isLoading,
                 )
 
-                TermsAndPolicies()
+                TermsAndPolicies(
+                    onTermsClicked = { onEvent(SignInModelEvent.OnTermsClicked) },
+                    onPoliciesClicked = { onEvent(SignInModelEvent.OnPoliciesClicked) }
+                )
 
                 QuestionButton(
                     questionText = "Não possui cadastro?",
                     actionTitle = "CADASTRAR",
-                    onClicked = { onEvent(SignInModelEvent.OnSignUpClicked) },
+                    onClicked = { onEvent(SignInModelEvent.OnSignUpClicked(onNavigate)) },
                     isEnabled = !state.isLoading,
                 )
             }
@@ -140,7 +150,11 @@ fun SignInViewContent(
 @Composable
 fun PreviewPhone() {
     EllionTheme {
-        SignInViewContent(state = SignInModelState(email = "alice@wonderland.co"), onEvent = {})
+        SignInViewContent(
+            state = SignInModelState(email = "alice@wonderland.co"),
+            onEvent = {},
+            onNavigate = {},
+        )
     }
 }
 
@@ -148,7 +162,11 @@ fun PreviewPhone() {
 @Composable
 fun PreviewPhoneSmall() {
     EllionTheme {
-        SignInViewContent(state = SignInModelState(email = "alice@wonderland.co"), onEvent = {})
+        SignInViewContent(
+            state = SignInModelState(email = "alice@wonderland.co"),
+            onEvent = {},
+            onNavigate = {},
+        )
     }
 }
 
@@ -156,7 +174,11 @@ fun PreviewPhoneSmall() {
 @Composable
 fun PreviewTabletPortrait() {
     EllionTheme {
-        SignInViewContent(state = SignInModelState(email = "alice@wonderland.co"), onEvent = {})
+        SignInViewContent(
+            state = SignInModelState(email = "alice@wonderland.co"),
+            onEvent = {},
+            onNavigate = {},
+        )
     }
 }
 
@@ -164,6 +186,10 @@ fun PreviewTabletPortrait() {
 @Composable
 fun PreviewTabletLandscape() {
     EllionTheme {
-        SignInViewContent(state = SignInModelState(email = "alice@wonderland.co"), onEvent = {})
+        SignInViewContent(
+            state = SignInModelState(email = "alice@wonderland.co"),
+            onEvent = {},
+            onNavigate = {},
+        )
     }
 }

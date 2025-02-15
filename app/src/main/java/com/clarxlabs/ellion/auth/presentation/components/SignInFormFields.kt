@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.auth.components
+package com.clarxlabs.ellion.auth.presentation.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,13 +22,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.clarxlabs.ellion.ui.theme.EllionTheme
+import com.clarxlabs.ellion.application.theme.EllionTheme
 
 @Composable
 fun SignInFormFields(
     email: String = "",
+    emailErrorMessage: String = "",
     onEmailChanged: (String) -> Unit = {},
     password: String = "",
+    passwordErrorMessage: String = "",
     onPasswordChanged: (String) -> Unit = {},
     isPasswordVisible: Boolean = false,
     onPasswordVisibilityClicked: () -> Unit = {},
@@ -40,11 +42,18 @@ fun SignInFormFields(
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChanged,
+            isError = emailErrorMessage.isNotEmpty(),
+            supportingText = if (emailErrorMessage.isNotEmpty()) {
+                { Text(text = emailErrorMessage) }
+            } else null,
             label = { Text("Email") },
             shape = MaterialTheme.shapes.large,
             enabled = !isLoading and isEnabled,
             leadingIcon = {
-                Icon(imageVector = Icons.Default.Email, contentDescription = "Email Icon")
+                Icon(
+                    imageVector = Icons.Default.Email,
+                    contentDescription = "Email icon"
+                )
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -53,13 +62,17 @@ fun SignInFormFields(
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChanged,
+            isError = passwordErrorMessage.isNotEmpty(),
+            supportingText = if (passwordErrorMessage.isNotEmpty()) {
+                { Text(text = passwordErrorMessage) }
+            } else null,
             label = { Text("Senha") },
             shape = MaterialTheme.shapes.large,
             enabled = !isLoading and isEnabled,
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Lock,
-                    contentDescription = "Password Icon"
+                    contentDescription = "Password icon"
                 )
             },
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),

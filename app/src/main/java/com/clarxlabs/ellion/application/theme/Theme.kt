@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.theme
+package com.clarxlabs.ellion.application.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

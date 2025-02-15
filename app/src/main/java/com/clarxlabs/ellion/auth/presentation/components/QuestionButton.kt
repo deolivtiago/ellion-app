@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.auth.components
+package com.clarxlabs.ellion.auth.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.clarxlabs.ellion.ui.theme.EllionTheme
+import com.clarxlabs.ellion.application.theme.EllionTheme
 
 @Composable
 fun QuestionButton(

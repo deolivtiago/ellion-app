@@ -1,35 +1,58 @@
 package com.clarxlabs.ellion
 
 import androidx.compose.runtime.Composable
-import com.clarxlabs.ellion.auth.signin.SignInView
-import com.clarxlabs.ellion.auth.signin.SignInViewModel
-import com.clarxlabs.ellion.auth.signin.data.RemoteDataSource
-import com.clarxlabs.ellion.core.HttpClientFactory
-import com.clarxlabs.ellion.ui.theme.EllionTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
+import androidx.navigation.compose.rememberNavController
+import com.clarxlabs.ellion.application.config.HttpClientFactory
+import com.clarxlabs.ellion.application.config.NavRoute
+import com.clarxlabs.ellion.application.theme.EllionTheme
+import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
+import com.clarxlabs.ellion.auth.data.remote.MainAuthDataSource
+import com.clarxlabs.ellion.auth.presentation.signin.SignInView
+import com.clarxlabs.ellion.auth.presentation.signin.SignInViewModel
+import com.clarxlabs.ellion.auth.presentation.signup.SignUpView
+import com.clarxlabs.ellion.auth.presentation.signup.SignUpViewModel
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.HttpClientEngine
-import io.ktor.client.engine.okhttp.OkHttp
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.KoinApplication
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
-val networkModule = module {
-    single<HttpClientEngine> { OkHttp.create() }
-    single<HttpClient> { HttpClientFactory.create(get()) }
+val dataSources = module {
+    singleOf(HttpClientFactory::create).bind<HttpClient>()
+    singleOf(::MainAuthDataSource).bind<AuthDataSource>()
 }
 
-val remoteDataSourcesModule = module { singleOf(::RemoteDataSource) }
-
-val viewModelsModule = module { viewModelOf(::SignInViewModel) }
+val viewModels = module {
+    viewModelOf(::SignInViewModel)
+    viewModelOf(::SignUpViewModel)
+}
 
 @Composable
 fun MainApplication() {
-    KoinApplication(application = {
-        modules(
-            networkModule,
-            remoteDataSourcesModule,
-            viewModelsModule
-        )
-    }) { EllionTheme { SignInView() } }
+    KoinApplication({ modules(dataSources, viewModels) }) {
+        EllionTheme {
+            val navController = rememberNavController()
+            NavHost(navController, NavRoute.AuthGraph) {
+                navigation<NavRoute.AuthGraph>(startDestination = NavRoute.SignIn) {
+                    composable<NavRoute.SignIn> {
+                        SignInView(
+                            viewModel = koinViewModel(),
+                            onNavigate = navController::navigate,
+                        )
+                    }
+                    composable<NavRoute.SignUp> {
+                        SignUpView(
+                            viewModel = koinViewModel(),
+                            onNavigate = navController::navigate,
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

@@ -1,10 +1,12 @@
-package com.clarxlabs.ellion.auth.signin
+package com.clarxlabs.ellion.auth.presentation.signin
+
+import com.clarxlabs.ellion.application.config.NavRoute
 
 data class SignInModelState(
     val isLoading: Boolean = false,
-    val email: String = "",
+    val email: String = "deoliv.tiago@gmail.com",
     val emailErrorMessage: String = "",
-    val password: String = "",
+    val password: String = "4m1Mad?",
     val passwordErrorMessage: String = "",
     val isPasswordVisible: Boolean = false,
 )
@@ -16,5 +18,7 @@ sealed interface SignInModelEvent {
     object OnSubmitClicked : SignInModelEvent
     object OnResetPasswordClicked : SignInModelEvent
     object OnContactClicked : SignInModelEvent
-    object OnSignUpClicked : SignInModelEvent
+    object OnTermsClicked : SignInModelEvent
+    object OnPoliciesClicked : SignInModelEvent
+    data class OnSignUpClicked(val navigateTo: (NavRoute) -> Unit) : SignInModelEvent
 }

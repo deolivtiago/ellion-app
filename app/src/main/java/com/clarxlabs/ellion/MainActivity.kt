@@ -6,9 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.clarxlabs.ellion.auth.signin.SignInModelState
-import com.clarxlabs.ellion.auth.signin.SignInViewContent
-import com.clarxlabs.ellion.ui.theme.EllionTheme
+import com.clarxlabs.ellion.application.theme.EllionTheme
+import com.clarxlabs.ellion.auth.presentation.signin.SignInModelState
+import com.clarxlabs.ellion.auth.presentation.signin.SignInViewContent
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +24,8 @@ fun MainAppPreview() {
     EllionTheme {
         SignInViewContent(
             state = SignInModelState(email = "alice@wonderland.co"),
-            onEvent = {}
+            onEvent = {},
+            onNavigate = {},
         )
     }
 }

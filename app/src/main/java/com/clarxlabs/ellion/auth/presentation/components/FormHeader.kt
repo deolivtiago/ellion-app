@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.auth.components
+package com.clarxlabs.ellion.auth.presentation.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import com.clarxlabs.ellion.ui.theme.EllionTheme
+import com.clarxlabs.ellion.application.theme.EllionTheme
 
 @Composable
 fun FormHeader(
