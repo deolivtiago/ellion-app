@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.clarxlabs.ellion.application.theme.EllionTheme
 
 @Composable
-fun FilledButton(
+fun ActionButton(
     isEnabled: Boolean = true,
     isLoading: Boolean = false,
     onClicked: () -> Unit = {},
@@ -41,6 +41,6 @@ fun FilledButton(
 @Composable
 private fun FilledButtonPreview() {
     EllionTheme {
-        Surface { FilledButton() }
+        Surface { ActionButton() }
     }
 }

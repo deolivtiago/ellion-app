@@ -5,86 +5,89 @@ import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.dtos.SignUpInput
+import io.ktor.client.statement.HttpResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SignUpViewModel(private val authDataSource: AuthDataSource) : ViewModel() {
-    private val _state = MutableStateFlow(SignUpModelState())
+    private val initialState = SignUpModel.State()
+    private val _state = MutableStateFlow(initialState)
+    private val setState = _state::update
     val state = _state.asStateFlow()
 
-    fun onEvent(event: SignUpModelEvent) {
+    fun onEvent(event: SignUpModel.Event) {
         when (event) {
-            is SignUpModelEvent.OnContactClicked -> {
-                _state.update { it.copy(isLoading = false, isPasswordVisible = false) }
+            is SignUpModel.Event.OnContactClicked -> {
+                setState { it.copy(isLoading = false, isPasswordVisible = false) }
             }
 
-            is SignUpModelEvent.OnEmailChanged -> {
-                _state.update { it.copy(email = event.email, emailErrorMessage = event.email) }
+            is SignUpModel.Event.OnEmailChanged -> {
+                setState { it.copy(email = event.email, emailError = "") }
             }
 
-            is SignUpModelEvent.OnFullNameChanged -> {
-                _state.update {
-                    it.copy(
-                        fullName = event.fullName,
-                        fullNameErrorMessage = event.fullName
-                    )
-                }
+            is SignUpModel.Event.OnFullNameChanged -> {
+                setState { it.copy(fullName = event.fullName, fullNameError = "") }
             }
 
-            is SignUpModelEvent.OnPasswordChanged -> {
-                _state.update {
-                    it.copy(
-                        password = event.password,
-                        passwordErrorMessage = event.password
-                    )
-                }
+            is SignUpModel.Event.OnPasswordChanged -> {
+                setState { it.copy(password = event.password, passwordError = "") }
             }
 
-            is SignUpModelEvent.OnPasswordConfirmationChanged -> {
-                _state.update {
+            is SignUpModel.Event.OnPasswordConfirmationChanged -> {
+                setState {
                     it.copy(
                         passwordConfirmation = event.passwordConfirmation,
-                        passwordConfirmationErrorMessage = event.passwordConfirmation
+                        passwordConfirmationError = ""
                     )
                 }
             }
 
-            is SignUpModelEvent.OnPasswordVisibilityClicked -> {
-                _state.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
+            is SignUpModel.Event.OnPasswordVisibilityClicked -> {
+                setState { it.copy(isPasswordVisible = !it.isPasswordVisible) }
             }
 
-            is SignUpModelEvent.OnPoliciesClicked -> {
-                _state.update { it.copy(isPasswordVisible = false) }
+            is SignUpModel.Event.OnPoliciesClicked -> {
+                setState { it.copy(isPasswordVisible = false) }
             }
 
-            is SignUpModelEvent.OnResetPasswordClicked -> {
-                _state.update { it.copy(isPasswordVisible = false) }
+            is SignUpModel.Event.OnResetPasswordClicked -> {
+                setState { it.copy(isPasswordVisible = false) }
             }
 
-            is SignUpModelEvent.OnSignInClicked -> {
-                _state.update { it.copy(isPasswordVisible = false) }
+            is SignUpModel.Event.OnSignInClicked -> {
+                setState { it.copy(isPasswordVisible = false) }
 
                 event.navigateTo(NavRoute.SignIn)
             }
 
-            is SignUpModelEvent.OnSubmitClicked -> {
-                _state.update { it.copy(isLoading = true, isPasswordVisible = false) }
+            is SignUpModel.Event.OnSubmitClicked -> {
+                setState { it.copy(isLoading = true, isPasswordVisible = false) }
 
-                val input = SignUpInput(
-                    firstName = state.value.fullName.substringBefore(" "),
-                    lastName = state.value.fullName.substringAfter(" "),
-                    email = state.value.email,
-                    password = state.value.password,
-                )
+                signUp {
+                    if (it.status.value == 201) {
+                        event.navigateTo(NavRoute.Verify(state.value.email))
+                    }
+                }
 
-                viewModelScope.launch { authDataSource.signUp(input) }
+                setState { it.copy(isLoading = false) }
             }
 
-            is SignUpModelEvent.OnTermsClicked -> {
-                _state.update { it.copy(isPasswordVisible = false) }
+            is SignUpModel.Event.OnTermsClicked -> {
+                setState { it.copy(isPasswordVisible = false) }
             }
         }
+    }
+
+    private fun signUp(onResponse: (HttpResponse) -> Unit) {
+        val input = SignUpInput(
+            firstName = state.value.fullName.substringBefore(" "),
+            lastName = state.value.fullName.substringAfter(" "),
+            email = state.value.email,
+            password = state.value.password,
+        )
+
+        viewModelScope.launch { onResponse(authDataSource.signUp(input)) }
     }
 }

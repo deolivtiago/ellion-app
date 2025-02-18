@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.clarxlabs.ellion.application.theme.EllionTheme
 
 @Composable
-fun SignInFormFields(
+fun CredentialsFormFields(
     email: String = "",
     emailErrorMessage: String = "",
     onEmailChanged: (String) -> Unit = {},
@@ -83,7 +83,7 @@ fun SignInFormFields(
                     enabled = !isLoading and isEnabled,
                 ) {
                     Icon(
-                        imageVector = if (isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                         contentDescription = "Password visibility toggle",
                     )
                 }
@@ -100,7 +100,7 @@ fun SignInFormFields(
 private fun SignInFormFieldsPreview() {
     EllionTheme {
         Surface {
-            SignInFormFields()
+            CredentialsFormFields()
         }
     }
 }

@@ -1,24 +1,28 @@
 package com.clarxlabs.ellion.auth.presentation.signin
 
 import com.clarxlabs.ellion.application.config.NavRoute
+import kotlinx.serialization.Serializable
 
-data class SignInModelState(
-    val isLoading: Boolean = false,
-    val email: String = "deoliv.tiago@gmail.com",
-    val emailErrorMessage: String = "",
-    val password: String = "4m1Mad?",
-    val passwordErrorMessage: String = "",
-    val isPasswordVisible: Boolean = false,
-)
+sealed interface SignInModel {
+    @Serializable
+    data class State(
+        val email: String = "deoliv.tiago@gmail.com",
+        val emailError: String = "",
+        val password: String = "4m1Mad?",
+        val passwordError: String = "",
+        val isPasswordVisible: Boolean = false,
+        val isLoading: Boolean = false,
+    ) : SignInModel
 
-sealed interface SignInModelEvent {
-    data class OnEmailChanged(val email: String) : SignInModelEvent
-    data class OnPasswordChanged(val password: String) : SignInModelEvent
-    object OnPasswordVisibilityClicked : SignInModelEvent
-    object OnSubmitClicked : SignInModelEvent
-    object OnResetPasswordClicked : SignInModelEvent
-    object OnContactClicked : SignInModelEvent
-    object OnTermsClicked : SignInModelEvent
-    object OnPoliciesClicked : SignInModelEvent
-    data class OnSignUpClicked(val navigateTo: (NavRoute) -> Unit) : SignInModelEvent
+    sealed interface Event {
+        data class OnEmailChanged(val email: String) : Event
+        data class OnPasswordChanged(val password: String) : Event
+        data object OnPasswordVisibilityClicked : Event
+        data class OnSubmitClicked(val navigateTo: (NavRoute) -> Unit) : Event
+        data object OnResetPasswordClicked : Event
+        data object OnContactClicked : Event
+        data object OnTermsClicked : Event
+        data object OnPoliciesClicked : Event
+        data class OnSignUpClicked(val navigateTo: (NavRoute) -> Unit) : Event
+    }
 }

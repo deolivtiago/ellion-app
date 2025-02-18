@@ -38,10 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.application.theme.EllionTheme
-import com.clarxlabs.ellion.auth.presentation.components.FilledButton
+import com.clarxlabs.ellion.auth.presentation.components.ActionButton
+import com.clarxlabs.ellion.auth.presentation.components.CredentialsFormFields
 import com.clarxlabs.ellion.auth.presentation.components.FormHeader
 import com.clarxlabs.ellion.auth.presentation.components.QuestionButton
-import com.clarxlabs.ellion.auth.presentation.components.SignInFormFields
 import com.clarxlabs.ellion.auth.presentation.components.TermsAndPolicies
 
 @Composable
@@ -54,8 +54,8 @@ fun SignUpView(viewModel: SignUpViewModel, onNavigate: (NavRoute) -> Unit) {
 
 @Composable
 fun SignUpViewContent(
-    state: SignUpModelState,
-    onEvent: (SignUpModelEvent) -> Unit,
+    state: SignUpModel.State,
+    onEvent: (SignUpModel.Event) -> Unit,
     onNavigate: (NavRoute) -> Unit,
 ) {
     Surface(
@@ -95,19 +95,25 @@ fun SignUpViewContent(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(bottom = 16.dp, top = 32.dp, start = 16.dp, end = 16.dp),
             ) {
-                FormHeader(title = "Criar Cadastro")
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                ) {
+                    FormHeader(title = "Criar Cadastro")
 
-                QuestionButton(
-                    questionText = "Precisa de ajuda?",
-                    actionTitle = "Entrar em contato",
-                    onClicked = { onEvent(SignUpModelEvent.OnContactClicked) },
-                    modifier = Modifier.align(Alignment.End),
-                )
+                    QuestionButton(
+                        questionText = "Precisa de ajuda?",
+                        actionTitle = "Entrar em contato",
+                        onClicked = { onEvent(SignUpModel.Event.OnContactClicked) },
+                        modifier = Modifier.align(Alignment.End),
+                    )
+                }
 
                 Column {
                     OutlinedTextField(
                         value = state.fullName,
-                        onValueChange = { onEvent(SignUpModelEvent.OnFullNameChanged(it)) },
+                        onValueChange = { onEvent(SignUpModel.Event.OnFullNameChanged(it)) },
                         label = { Text("Nome Completo") },
                         shape = MaterialTheme.shapes.large,
                         enabled = !state.isLoading,
@@ -122,19 +128,19 @@ fun SignUpViewContent(
                             .padding(2.dp),
                     )
 
-                    SignInFormFields(
+                    CredentialsFormFields(
                         email = state.email,
-                        onEmailChanged = { onEvent(SignUpModelEvent.OnEmailChanged(it)) },
+                        onEmailChanged = { onEvent(SignUpModel.Event.OnEmailChanged(it)) },
                         password = state.password,
-                        onPasswordChanged = { onEvent(SignUpModelEvent.OnPasswordChanged(it)) },
+                        onPasswordChanged = { onEvent(SignUpModel.Event.OnPasswordChanged(it)) },
                         isPasswordVisible = state.isPasswordVisible,
-                        onPasswordVisibilityClicked = { onEvent(SignUpModelEvent.OnPasswordVisibilityClicked) },
+                        onPasswordVisibilityClicked = { onEvent(SignUpModel.Event.OnPasswordVisibilityClicked) },
                         isLoading = state.isLoading,
                     )
 
                     OutlinedTextField(
                         value = state.passwordConfirmation,
-                        onValueChange = { onEvent(SignUpModelEvent.OnPasswordConfirmationChanged(it)) },
+                        onValueChange = { onEvent(SignUpModel.Event.OnPasswordConfirmationChanged(it)) },
                         label = { Text("Confirmação de Senha") },
                         shape = MaterialTheme.shapes.large,
                         enabled = !state.isLoading,
@@ -148,11 +154,11 @@ fun SignUpViewContent(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         trailingIcon = {
                             IconButton(
-                                onClick = { onEvent(SignUpModelEvent.OnPasswordVisibilityClicked) },
+                                onClick = { onEvent(SignUpModel.Event.OnPasswordVisibilityClicked) },
                                 enabled = !state.isLoading,
                             ) {
                                 Icon(
-                                    imageVector = if (state.isPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                    imageVector = if (state.isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                     contentDescription = "Password visibility toggle",
                                 )
                             }
@@ -163,20 +169,20 @@ fun SignUpViewContent(
                     )
                 }
 
-                FilledButton(
-                    onClicked = { onEvent(SignUpModelEvent.OnSubmitClicked) },
+                ActionButton(
+                    onClicked = { onEvent(SignUpModel.Event.OnSubmitClicked(onNavigate)) },
                     isLoading = state.isLoading,
                 )
 
                 TermsAndPolicies(
-                    onTermsClicked = { onEvent(SignUpModelEvent.OnTermsClicked) },
-                    onPoliciesClicked = { onEvent(SignUpModelEvent.OnPoliciesClicked) },
+                    onTermsClicked = { onEvent(SignUpModel.Event.OnTermsClicked) },
+                    onPoliciesClicked = { onEvent(SignUpModel.Event.OnPoliciesClicked) },
                 )
 
                 QuestionButton(
                     questionText = "Já possui cadastro?",
                     actionTitle = "ENTRAR",
-                    onClicked = { onEvent(SignUpModelEvent.OnSignInClicked(onNavigate)) },
+                    onClicked = { onEvent(SignUpModel.Event.OnSignInClicked(onNavigate)) },
                     isEnabled = !state.isLoading,
                 )
             }
@@ -196,7 +202,7 @@ fun SignUpViewContent(
 fun PreviewPhone() {
     EllionTheme {
         SignUpViewContent(
-            state = SignUpModelState(),
+            state = SignUpModel.State(),
             onEvent = {},
             onNavigate = {},
         )
@@ -208,7 +214,7 @@ fun PreviewPhone() {
 fun PreviewPhoneSmall() {
     EllionTheme {
         SignUpViewContent(
-            state = SignUpModelState(),
+            state = SignUpModel.State(),
             onEvent = {},
             onNavigate = {},
         )
@@ -220,7 +226,7 @@ fun PreviewPhoneSmall() {
 fun PreviewTabletPortrait() {
     EllionTheme {
         SignUpViewContent(
-            state = SignUpModelState(),
+            state = SignUpModel.State(),
             onEvent = {},
             onNavigate = {},
         )
@@ -232,7 +238,7 @@ fun PreviewTabletPortrait() {
 fun PreviewTabletLandscape() {
     EllionTheme {
         SignUpViewContent(
-            state = SignUpModelState(),
+            state = SignUpModel.State(),
             onEvent = {},
             onNavigate = {},
         )

@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.auth.presentation.signin
+package com.clarxlabs.ellion.auth.presentation.verify
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,34 +15,40 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.application.theme.EllionTheme
 import com.clarxlabs.ellion.auth.presentation.components.ActionButton
-import com.clarxlabs.ellion.auth.presentation.components.CredentialsFormFields
 import com.clarxlabs.ellion.auth.presentation.components.FormHeader
 import com.clarxlabs.ellion.auth.presentation.components.QuestionButton
-import com.clarxlabs.ellion.auth.presentation.components.TermsAndPolicies
 
 @Composable
-fun SignInView(viewModel: SignInViewModel, onNavigate: (NavRoute) -> Unit) {
+fun VerifyView(viewModel: VerifyViewModel, onNavigate: (NavRoute) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val onEvent = viewModel::onEvent
 
-    SignInViewContent(state, onEvent, onNavigate)
+    VerifyViewContent(state, onEvent, onNavigate)
 }
 
 @Composable
-fun SignInViewContent(
-    state: SignInModel.State,
-    onEvent: (SignInModel.Event) -> Unit,
+fun VerifyViewContent(
+    state: VerifyModel.State,
+    onEvent: (VerifyModel.Event) -> Unit,
     onNavigate: (NavRoute) -> Unit,
 ) {
     Surface(
@@ -87,54 +93,54 @@ fun SignInViewContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(vertical = 4.dp)
                 ) {
-                    FormHeader(title = "Acessar Cadastro")
+                    FormHeader(title = "Verificar Email")
 
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        QuestionButton(
-                            questionText = "Precisa de ajuda?",
-                            actionTitle = "Entrar em contato",
-                            onClicked = { onEvent(SignInModel.Event.OnContactClicked) },
-                            modifier = Modifier.align(Alignment.End),
-                        )
-                        QuestionButton(
-                            questionText = "Esqueceu sua senha?",
-                            actionTitle = "Recuperar",
-                            onClicked = { onEvent(SignInModel.Event.OnResetPasswordClicked) },
-                            modifier = Modifier.align(Alignment.End),
-                            isEnabled = !state.isLoading,
-                        )
-                    }
+                    QuestionButton(
+                        questionText = "Precisa de ajuda?",
+                        actionTitle = "Entrar em contato",
+                        onClicked = { onEvent(VerifyModel.Event.OnContactClicked) },
+                        modifier = Modifier.align(Alignment.End),
+                    )
                 }
 
-                CredentialsFormFields(
-                    email = state.email,
-                    emailErrorMessage = state.emailError,
-                    onEmailChanged = { onEvent(SignInModel.Event.OnEmailChanged(it)) },
-                    password = state.password,
-                    passwordErrorMessage = state.passwordError,
-                    onPasswordChanged = { onEvent(SignInModel.Event.OnPasswordChanged(it)) },
-                    isPasswordVisible = state.isPasswordVisible,
-                    onPasswordVisibilityClicked = { onEvent(SignInModel.Event.OnPasswordVisibilityClicked) },
-                    isLoading = state.isLoading,
+                Text(
+                    textAlign = TextAlign.Center,
+                    text = buildAnnotatedString {
+                        withStyle(
+                            SpanStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                                color = MaterialTheme.typography.bodyLarge.color,
+                            )
+                        ) { append("Antes de acessar seu cadastro\nprecisamos verificar o email\n") }
+                        withStyle(
+                            SpanStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary,
+                                letterSpacing = TextUnit(1.5F, TextUnitType.Sp),
+                            )
+                        ) { append(state.email) }
+                        withStyle(
+                            SpanStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                                color = MaterialTheme.typography.bodyLarge.color,
+                            )
+                        ) { append(".\nAo continuar, você receberá um email\ncom o código para confirmação\ndo seu cadastro.") }
+                    }
                 )
 
                 ActionButton(
-                    onClicked = { onEvent(SignInModel.Event.OnSubmitClicked(onNavigate)) },
+                    onClicked = { onEvent(VerifyModel.Event.OnSubmitClicked(onNavigate)) },
                     isLoading = state.isLoading,
-                )
-
-                TermsAndPolicies(
-                    onTermsClicked = { onEvent(SignInModel.Event.OnTermsClicked) },
-                    onPoliciesClicked = { onEvent(SignInModel.Event.OnPoliciesClicked) }
+                    actionTitle = "CONTINUAR"
                 )
 
                 QuestionButton(
-                    questionText = "Não possui cadastro?",
-                    actionTitle = "CADASTRAR",
-                    onClicked = { onEvent(SignInModel.Event.OnSignUpClicked(onNavigate)) },
+                    questionText = "Já possui um código?",
+                    actionTitle = "CONFIRMAR",
+                    onClicked = { onEvent(VerifyModel.Event.OnConfirmClicked(onNavigate)) },
                     isEnabled = !state.isLoading,
                 )
             }
@@ -148,48 +154,12 @@ fun SignInViewContent(
     }
 }
 
-@Preview(showSystemUi = true, device = "spec:parent=pixel_3a")
+@Preview(device = "spec:parent=small_phone,navigation=buttons", showSystemUi = true)
 @Composable
-fun PreviewPhone() {
+private fun VerifyViewContentPreview() {
     EllionTheme {
-        SignInViewContent(
-            state = SignInModel.State(email = "alice@wonderland.co"),
-            onEvent = {},
-            onNavigate = {},
-        )
-    }
-}
-
-@Preview(showSystemUi = true, device = "spec:parent=Galaxy Nexus,navigation=buttons")
-@Composable
-fun PreviewPhoneSmall() {
-    EllionTheme {
-        SignInViewContent(
-            state = SignInModel.State(email = "alice@wonderland.co"),
-            onEvent = {},
-            onNavigate = {},
-        )
-    }
-}
-
-@Preview(device = "spec:parent=Nexus 7 2013,navigation=buttons", showSystemUi = true)
-@Composable
-fun PreviewTabletPortrait() {
-    EllionTheme {
-        SignInViewContent(
-            state = SignInModel.State(email = "alice@wonderland.co"),
-            onEvent = {},
-            onNavigate = {},
-        )
-    }
-}
-
-@Preview(device = "spec:parent=Nexus 10,navigation=buttons", showSystemUi = true)
-@Composable
-fun PreviewTabletLandscape() {
-    EllionTheme {
-        SignInViewContent(
-            state = SignInModel.State(email = "alice@wonderland.co"),
+        VerifyViewContent(
+            state = VerifyModel.State(),
             onEvent = {},
             onNavigate = {},
         )

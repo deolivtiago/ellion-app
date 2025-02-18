@@ -62,11 +62,7 @@ fun TermsAndPolicies(
                     maxLines = 1,
                 )
             }
-            Text(
-//                modifier = Modifier.padding(2.dp),
-                text = "e",
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Text(text = "e", style = MaterialTheme.typography.bodyLarge)
             TextButton(
                 modifier = Modifier.height(22.dp),
                 onClick = onPoliciesClicked,

@@ -26,7 +26,7 @@ object HttpClientFactory {
         defaultRequest {
             url {
                 protocol = URLProtocol.HTTPS
-                host = MainAPIRoutes.BASE_URL
+                host = MainAPIRoute.BASE_URL
             }
             headers { append(HttpHeaders.Accept, ContentType.Application.Json.toString()) }
             contentType(ContentType.Application.Json)
