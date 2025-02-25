@@ -1,5 +1,6 @@
-package com.clarxlabs.ellion.application.config
+package com.clarxlabs.ellion.application.factories
 
+import com.clarxlabs.ellion.application.config.APIRoute
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.HttpRequestRetry
@@ -9,13 +10,9 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.headers
-import io.ktor.client.request.request
-import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
 import io.ktor.http.URLProtocol
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
@@ -26,7 +23,7 @@ object HttpClientFactory {
         defaultRequest {
             url {
                 protocol = URLProtocol.HTTPS
-                host = MainAPIRoute.BASE_URL
+                host = APIRoute.BASE_URL
             }
             headers { append(HttpHeaders.Accept, ContentType.Application.Json.toString()) }
             contentType(ContentType.Application.Json)
@@ -55,21 +52,3 @@ object HttpClientFactory {
         }
     }
 }
-
-suspend fun HttpClient.makeRequest(
-    request: RequestOptions,
-    block: HttpRequestBuilder.() -> Unit = {},
-): HttpResponse = this
-    .request(request.url) {
-        method = request.method
-        headers { request.headers.forEach { append(it.key, it.value) } }
-        url { request.queries.forEach { parameters.append(it.key, it.value) } }
-        block()
-    }
-
-data class RequestOptions(
-    val url: String,
-    val method: HttpMethod,
-    val headers: Map<String, String> = emptyMap(),
-    val queries: Map<String, String> = emptyMap(),
-)

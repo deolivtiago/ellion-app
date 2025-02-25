@@ -1,57 +1,50 @@
 package com.clarxlabs.ellion.auth.data.remote
 
-import com.clarxlabs.ellion.application.config.RequestOptions
-import com.clarxlabs.ellion.application.config.makeRequest
-import com.clarxlabs.ellion.auth.data.remote.dtos.ConfirmInput
-import com.clarxlabs.ellion.auth.data.remote.dtos.SignInInput
-import com.clarxlabs.ellion.auth.data.remote.dtos.SignOutInput
-import com.clarxlabs.ellion.auth.data.remote.dtos.SignUpInput
-import com.clarxlabs.ellion.auth.data.remote.dtos.VerifyInput
+import com.clarxlabs.ellion.application.config.APIRoute
+import com.clarxlabs.ellion.application.factories.HttpRequestFactory
+import com.clarxlabs.ellion.auth.data.remote.inputs.ConfirmInput
+import com.clarxlabs.ellion.auth.data.remote.inputs.SignInInput
+import com.clarxlabs.ellion.auth.data.remote.inputs.SignOutInput
+import com.clarxlabs.ellion.auth.data.remote.inputs.SignUpInput
+import com.clarxlabs.ellion.auth.data.remote.inputs.VerifyInput
 import io.ktor.client.HttpClient
-import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpMethod
 
 class MainAuthDataSource(private val httpClient: HttpClient) : AuthDataSource {
-    override suspend fun signIn(
-        input: SignInInput, requestOptions: RequestOptions
-    ): HttpResponse = makeRequest(input, requestOptions)
+    override suspend fun signIn(input: SignInInput): HttpResponse =
+        HttpRequestFactory(httpClient)
+            .create(HttpMethod.Post, APIRoute.SIGNIN)
+            .setBody(input)
+            .execute()
 
-    override suspend fun signUp(
-        input: SignUpInput, requestOptions: RequestOptions
-    ): HttpResponse = makeRequest(input, requestOptions)
+    override suspend fun signUp(input: SignUpInput): HttpResponse =
+        HttpRequestFactory(httpClient)
+            .create(HttpMethod.Post, APIRoute.SIGNUP)
+            .setBody(input)
+            .execute()
 
-    override suspend fun signOut(
-        input: SignOutInput, requestOptions: RequestOptions
-    ): HttpResponse {
+    override suspend fun signOut(input: SignOutInput): HttpResponse {
         val queries = mapOf(
             "access_token" to input.accessToken,
             "refresh_token" to input.refreshToken,
         )
 
-        return makeRequest(requestOptions.copy(queries = queries))
+        return HttpRequestFactory(httpClient)
+            .create(HttpMethod.Delete, APIRoute.SIGNOUT)
+            .setQueries(queries)
+            .execute()
     }
 
-    override suspend fun verify(
-        input: VerifyInput, requestOptions: RequestOptions
-    ): HttpResponse {
-        val queries = mapOf("email" to input.email)
+    override suspend fun verify(input: VerifyInput): HttpResponse =
+        HttpRequestFactory(httpClient)
+            .create(HttpMethod.Get, APIRoute.VERIFY)
+            .setQueries(mapOf("email" to input.email))
+            .execute()
 
-        return makeRequest(requestOptions.copy(queries = queries))
-    }
-
-    override suspend fun confirm(
-        input: ConfirmInput, requestOptions: RequestOptions
-    ): HttpResponse {
-        val queries = mapOf("email" to input.email, "code" to input.code)
-
-        return makeRequest(requestOptions.copy(queries = queries))
-    }
-
-    private suspend inline fun <reified T> makeRequest(
-        body: T, requestOptions: RequestOptions
-    ): HttpResponse = httpClient.makeRequest(requestOptions) { setBody(body) }
-
-    private suspend fun makeRequest(
-        requestOptions: RequestOptions
-    ): HttpResponse = httpClient.makeRequest(requestOptions)
+    override suspend fun confirm(input: ConfirmInput): HttpResponse =
+        HttpRequestFactory(httpClient)
+            .create(HttpMethod.Post, APIRoute.CONFIRM)
+            .setQueries(mapOf("email" to input.email, "code" to input.code))
+            .execute()
 }

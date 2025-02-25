@@ -1,6 +1,6 @@
 package com.clarxlabs.ellion.application.config
 
-object MainAPIRoute {
+object APIRoute {
     const val BASE_URL: String = "ellion.gigalixirapp.com"
 
     const val SIGNIN: String = "/api/auth/signin"

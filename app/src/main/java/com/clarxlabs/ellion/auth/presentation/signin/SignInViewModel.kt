@@ -4,9 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.application.defaults.MainHttpResponse
-import com.clarxlabs.ellion.auth.data.remote.Auth
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
-import com.clarxlabs.ellion.auth.data.remote.dtos.SignInInput
+import com.clarxlabs.ellion.auth.data.remote.inputs.SignInInput
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,13 +54,13 @@ class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
                     when (it.status.value) {
                         200 -> viewModelScope.launch {
                             val auth = it
-                                .body<MainHttpResponse.OkResponse<Auth>>()
+                                .body<MainHttpResponse.OkResponse<Map<String, String>>>()
                                 .data
 
                             event.navigateTo(
                                 NavRoute.Home(
-                                    auth.accessToken,
-                                    auth.refreshToken
+                                    auth["access_token"]!!,
+                                    auth["refresh_token"]!!,
                                 )
                             )
                         }

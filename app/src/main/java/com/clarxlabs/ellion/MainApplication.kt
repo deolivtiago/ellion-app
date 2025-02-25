@@ -5,8 +5,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.clarxlabs.ellion.application.config.HttpClientFactory
 import com.clarxlabs.ellion.application.config.NavRoute
+import com.clarxlabs.ellion.application.factories.HttpClientFactory
 import com.clarxlabs.ellion.application.theme.EllionTheme
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.MainAuthDataSource
@@ -45,7 +45,7 @@ fun MainApplication() {
         EllionTheme {
             val navController = rememberNavController()
             NavHost(navController, NavRoute.AuthGraph) {
-                navigation<NavRoute.AuthGraph>(startDestination = NavRoute.Home()) {
+                navigation<NavRoute.AuthGraph>(startDestination = NavRoute.SignIn) {
                     composable<NavRoute.SignIn> {
                         SignInView(
                             viewModel = koinViewModel(),
@@ -58,12 +58,6 @@ fun MainApplication() {
                             onNavigate = navController::navigate,
                         )
                     }
-                    composable<NavRoute.Home> {
-                        HomeView(
-                            viewModel = koinViewModel(),
-                            onNavigate = navController::navigate,
-                        )
-                    }
                     composable<NavRoute.Verify> {
                         VerifyView(
                             viewModel = koinViewModel(),
@@ -72,6 +66,12 @@ fun MainApplication() {
                     }
                     composable<NavRoute.Confirm> {
                         ConfirmView(
+                            viewModel = koinViewModel(),
+                            onNavigate = navController::navigate,
+                        )
+                    }
+                    composable<NavRoute.Home> {
+                        HomeView(
                             viewModel = koinViewModel(),
                             onNavigate = navController::navigate,
                         )

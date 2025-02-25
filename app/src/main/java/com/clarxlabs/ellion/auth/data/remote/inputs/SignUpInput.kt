@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.auth.data.remote.dtos
+package com.clarxlabs.ellion.auth.data.remote.inputs
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
