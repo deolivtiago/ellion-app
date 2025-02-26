@@ -8,4 +8,5 @@ object APIRoute {
     const val SIGNOUT: String = "/api/auth/signout"
     const val VERIFY: String = "/api/auth/verify"
     const val CONFIRM: String = "/api/auth/confirm"
+    const val LISTUSERS: String = "/api/users"
 }

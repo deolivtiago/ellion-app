@@ -9,4 +9,5 @@ interface AuthDataSource {
     suspend fun signOut(input: SignOutInput): HttpResponse
     suspend fun verify(input: VerifyInput): HttpResponse
     suspend fun confirm(input: ConfirmInput): HttpResponse
+    suspend fun listUsers(): HttpResponse
 }

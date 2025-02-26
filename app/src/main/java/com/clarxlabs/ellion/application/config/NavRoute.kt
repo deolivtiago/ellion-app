@@ -22,4 +22,6 @@ sealed interface NavRoute {
     @Serializable
     data class Home(val accessToken: String = "", val refreshToken: String = "") : NavRoute
 
+    @Serializable
+    data object ListUsers : NavRoute
 }

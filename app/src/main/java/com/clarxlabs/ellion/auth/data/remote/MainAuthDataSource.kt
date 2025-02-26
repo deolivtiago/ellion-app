@@ -47,4 +47,9 @@ class MainAuthDataSource(private val httpClient: HttpClient) : AuthDataSource {
             .create(HttpMethod.Post, APIRoute.CONFIRM)
             .setQueries(mapOf("email" to input.email, "code" to input.code))
             .execute()
+
+    override suspend fun listUsers(): HttpResponse =
+        HttpRequestFactory(httpClient)
+            .create(HttpMethod.Get, APIRoute.LISTUSERS)
+            .execute()
 }

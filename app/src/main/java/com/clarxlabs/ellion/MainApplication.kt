@@ -20,6 +20,8 @@ import com.clarxlabs.ellion.auth.presentation.signup.SignUpView
 import com.clarxlabs.ellion.auth.presentation.signup.SignUpViewModel
 import com.clarxlabs.ellion.auth.presentation.verify.VerifyView
 import com.clarxlabs.ellion.auth.presentation.verify.VerifyViewModel
+import com.clarxlabs.ellion.users.presentation.list.ListView
+import com.clarxlabs.ellion.users.presentation.list.ListViewModel
 import io.ktor.client.HttpClient
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.KoinApplication
@@ -37,6 +39,7 @@ val appModule = module {
     viewModelOf(::VerifyViewModel)
     viewModelOf(::ConfirmViewModel)
     viewModelOf(::HomeViewModel)
+    viewModelOf(::ListViewModel)
 }
 
 @Composable
@@ -45,7 +48,7 @@ fun MainApplication() {
         EllionTheme {
             val navController = rememberNavController()
             NavHost(navController, NavRoute.AuthGraph) {
-                navigation<NavRoute.AuthGraph>(startDestination = NavRoute.SignIn) {
+                navigation<NavRoute.AuthGraph>(startDestination = NavRoute.ListUsers) {
                     composable<NavRoute.SignIn> {
                         SignInView(
                             viewModel = koinViewModel(),
@@ -72,6 +75,12 @@ fun MainApplication() {
                     }
                     composable<NavRoute.Home> {
                         HomeView(
+                            viewModel = koinViewModel(),
+                            onNavigate = navController::navigate,
+                        )
+                    }
+                    composable<NavRoute.ListUsers> {
+                        ListView(
                             viewModel = koinViewModel(),
                             onNavigate = navController::navigate,
                         )
