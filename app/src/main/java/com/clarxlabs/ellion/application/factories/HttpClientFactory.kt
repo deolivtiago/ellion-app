@@ -1,5 +1,6 @@
 package com.clarxlabs.ellion.application.factories
 
+import android.util.Log
 import com.clarxlabs.ellion.application.config.APIRoute
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.*
@@ -45,7 +46,7 @@ object HttpClientFactory {
         install(Logging) {
             logger = object : Logger {
                 override fun log(message: String) {
-                    println(message)
+                    Log.d("debug", message)
                 }
             }
             level = LogLevel.ALL

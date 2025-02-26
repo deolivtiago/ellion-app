@@ -11,7 +11,7 @@ sealed interface SignUpModel {
         val password: String = "4m1Mad?",
         val fullName: String = "Tiago de Oliveira",
         val passwordConfirmation: String = "4m1Mad??",
-        val emailError: String = "Email inválido",
+        val emailError: String = "",
         val passwordError: String = "",
         val passwordConfirmationError: String = "As senhas devem ser iguais",
         val fullNameError: String = "",

@@ -48,7 +48,7 @@ fun MainApplication() {
         EllionTheme {
             val navController = rememberNavController()
             NavHost(navController, NavRoute.AuthGraph) {
-                navigation<NavRoute.AuthGraph>(startDestination = NavRoute.ListUsers) {
+                navigation<NavRoute.AuthGraph>(startDestination = NavRoute.SignIn) {
                     composable<NavRoute.SignIn> {
                         SignInView(
                             viewModel = koinViewModel(),

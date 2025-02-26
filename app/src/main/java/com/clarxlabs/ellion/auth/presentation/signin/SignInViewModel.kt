@@ -3,11 +3,11 @@ package com.clarxlabs.ellion.auth.presentation.signin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
-import com.clarxlabs.ellion.application.defaults.MainHttpResponse
+import com.clarxlabs.ellion.application.utilities.Result
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
-import com.clarxlabs.ellion.auth.data.remote.inputs.SignInInput
-import io.ktor.client.call.body
-import io.ktor.client.statement.HttpResponse
+import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsData
+import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsError
+import com.clarxlabs.ellion.auth.data.remote.dtos.TokensData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -51,30 +51,24 @@ class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
                 setState { it.copy(isLoading = true, isPasswordVisible = false) }
 
                 signIn {
-                    when (it.status.value) {
-                        200 -> viewModelScope.launch {
-                            val auth = it
-                                .body<MainHttpResponse.OkResponse<Map<String, String>>>()
-                                .data
-
-                            event.navigateTo(
-                                NavRoute.Home(
-                                    auth["access_token"]!!,
-                                    auth["refresh_token"]!!,
-                                )
+                    when (it) {
+                        is Result.Data -> event.navigateTo(
+                            NavRoute.Home(
+                                accessToken = it.data.accessToken,
+                                refreshToken = it.data.refreshToken,
                             )
-                        }
+                        )
 
-                        422 -> viewModelScope.launch {
-                            val errors = it
-                                .body<MainHttpResponse.UnprocessableEntity<Map<String, List<String>>>>()
-                                .errors
-
-                            if (errors.containsKey("email") &&
-                                errors["email"]!!.contains("must be verified")
-                            ) {
-                                event.navigateTo(NavRoute.Verify(state.value.email))
-                            }
+                        is Result.Error -> {
+                            if (it.errors.email.contains("must be verified"))
+                                event.navigateTo(NavRoute.Verify(email = state.value.email))
+                            else
+                                setState { state ->
+                                    state.copy(
+                                        emailError = it.errors.email.firstOrNull() ?: "",
+                                        passwordError = it.errors.password.firstOrNull() ?: "",
+                                    )
+                                }
                         }
                     }
                 }
@@ -92,8 +86,11 @@ class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
         }
     }
 
-    private fun signIn(onResponse: (HttpResponse) -> Unit) {
-        val input = SignInInput(state.value.email, state.value.password)
+    private fun signIn(onResponse: (Result<TokensData, CredentialsError>) -> Unit) {
+        val input = CredentialsData(
+            email = state.value.email,
+            password = state.value.password
+        )
 
         viewModelScope.launch { onResponse(authDataSource.signIn(input)) }
     }

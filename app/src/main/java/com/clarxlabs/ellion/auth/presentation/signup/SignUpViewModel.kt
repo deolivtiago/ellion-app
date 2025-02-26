@@ -3,9 +3,11 @@ package com.clarxlabs.ellion.auth.presentation.signup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
+import com.clarxlabs.ellion.application.utilities.Result
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
-import com.clarxlabs.ellion.auth.data.remote.inputs.SignUpInput
-import io.ktor.client.statement.HttpResponse
+import com.clarxlabs.ellion.auth.data.remote.dtos.UserData
+import com.clarxlabs.ellion.auth.data.remote.dtos.UserDataError
+import com.clarxlabs.ellion.auth.domain.entities.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -66,8 +68,24 @@ class SignUpViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
                 setState { it.copy(isLoading = true, isPasswordVisible = false) }
 
                 signUp {
-                    if (it.status.value == 201) {
-                        event.navigateTo(NavRoute.Verify(state.value.email))
+                    when (it) {
+                        is Result.Data -> event.navigateTo(NavRoute.Verify(state.value.email))
+                        is Result.Error -> setState { state ->
+                            state.copy(
+                                fullNameError = it
+                                    .errors
+                                    .firstName.plus(it.errors.lastName)
+                                    .firstOrNull() ?: "",
+                                emailError = it
+                                    .errors
+                                    .email
+                                    .firstOrNull() ?: "",
+                                passwordError = it
+                                    .errors
+                                    .password
+                                    .firstOrNull() ?: "",
+                            )
+                        }
                     }
                 }
 
@@ -80,10 +98,10 @@ class SignUpViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
         }
     }
 
-    private fun signUp(onResponse: (HttpResponse) -> Unit) {
-        val input = SignUpInput(
+    private fun signUp(onResponse: (Result<User, UserDataError>) -> Unit) {
+        val input = UserData(
             firstName = state.value.fullName.substringBefore(" "),
-            lastName = state.value.fullName.substringAfter(" "),
+            lastName = state.value.fullName.substringAfter(" ", ""),
             email = state.value.email,
             password = state.value.password,
         )

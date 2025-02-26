@@ -4,7 +4,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.headers
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpMethod
 import kotlin.collections.forEach
 
@@ -24,11 +23,11 @@ class HttpRequestFactory(val httpClient: HttpClient) {
     fun setQueries(queries: Map<String, String>) = apply { _queries = queries }
     fun <T> setBody(body: T) = apply { _body = body }
 
-    suspend fun execute(): HttpResponse =
-        httpClient.request(_url) {
-            method = _method
-            headers { _headers.forEach { append(it.key, it.value) } }
-            url { _queries.forEach { parameters.append(it.key, it.value) } }
-            setBody(_body)
-        }
+    suspend fun execute() = httpClient.request(_url) {
+        method = _method
+        headers { _headers.forEach { append(it.key, it.value) } }
+        url { _queries.forEach { parameters.append(it.key, it.value) } }
+        setBody(_body)
+    }
+
 }

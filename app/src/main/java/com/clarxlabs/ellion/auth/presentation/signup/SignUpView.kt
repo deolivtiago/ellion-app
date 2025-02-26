@@ -114,6 +114,10 @@ fun SignUpViewContent(
                     OutlinedTextField(
                         value = state.fullName,
                         onValueChange = { onEvent(SignUpModel.Event.OnFullNameChanged(it)) },
+                        isError = state.fullNameError.isNotEmpty(),
+                        supportingText = if (state.fullNameError.isNotEmpty()) {
+                            { Text(text = state.fullNameError) }
+                        } else null,
                         label = { Text("Nome Completo") },
                         shape = MaterialTheme.shapes.large,
                         enabled = !state.isLoading,
@@ -131,8 +135,10 @@ fun SignUpViewContent(
                     CredentialsFormFields(
                         email = state.email,
                         onEmailChanged = { onEvent(SignUpModel.Event.OnEmailChanged(it)) },
+                        emailErrorMessage = state.emailError,
                         password = state.password,
                         onPasswordChanged = { onEvent(SignUpModel.Event.OnPasswordChanged(it)) },
+                        passwordErrorMessage = state.passwordError,
                         isPasswordVisible = state.isPasswordVisible,
                         onPasswordVisibilityClicked = { onEvent(SignUpModel.Event.OnPasswordVisibilityClicked) },
                         isLoading = state.isLoading,
@@ -141,6 +147,9 @@ fun SignUpViewContent(
                     OutlinedTextField(
                         value = state.passwordConfirmation,
                         onValueChange = { onEvent(SignUpModel.Event.OnPasswordConfirmationChanged(it)) },
+                        supportingText = if (state.passwordConfirmationError.isNotEmpty()) {
+                            { Text(text = state.passwordConfirmationError) }
+                        } else null,
                         label = { Text("Confirmação de Senha") },
                         shape = MaterialTheme.shapes.large,
                         enabled = !state.isLoading,
