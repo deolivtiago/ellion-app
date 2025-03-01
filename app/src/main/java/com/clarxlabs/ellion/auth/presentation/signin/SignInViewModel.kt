@@ -8,6 +8,8 @@ import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsData
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsError
 import com.clarxlabs.ellion.auth.data.remote.dtos.TokensData
+import com.clarxlabs.ellion.auth.domain.validation.ValidationFactory
+import com.clarxlabs.ellion.auth.domain.validation.ValidationStrategy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -48,30 +50,41 @@ class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
             }
 
             is SignInModel.Event.OnSubmitClicked -> {
-                setState { it.copy(isLoading = true, isPasswordVisible = false) }
+                setState { it.copy(isLoading = true) }
 
-                signIn {
-                    when (it) {
-                        is Result.Data -> event.navigateTo(
-                            NavRoute.Home(
-                                accessToken = it.data.accessToken,
-                                refreshToken = it.data.refreshToken,
+                val isEmailValid = ValidationFactory
+                    .create(ValidationStrategy.Type.EMAIL)
+                    .validate(state.value.email) == ValidationStrategy.Result.VALID
+
+                val isPasswordValid = ValidationFactory
+                    .create(ValidationStrategy.Type.PASSWORD)
+                    .validate(state.value.password) == ValidationStrategy.Result.VALID
+
+                if (!isEmailValid) setState { it.copy(emailError = "Email inválido") }
+                else if (!isPasswordValid) setState { it.copy(passwordError = "Senha inválida") }
+                else
+                    signIn {
+                        when (it) {
+                            is Result.Data -> event.navigateTo(
+                                NavRoute.Home(
+                                    accessToken = it.data.accessToken,
+                                    refreshToken = it.data.refreshToken,
+                                )
                             )
-                        )
 
-                        is Result.Error -> {
-                            if (it.errors.email.contains("must be verified"))
-                                event.navigateTo(NavRoute.Verify(email = state.value.email))
-                            else
-                                setState { state ->
-                                    state.copy(
-                                        emailError = it.errors.email.firstOrNull() ?: "",
-                                        passwordError = it.errors.password.firstOrNull() ?: "",
-                                    )
-                                }
+                            is Result.Error -> {
+                                if (it.errors.email.contains("must be verified"))
+                                    event.navigateTo(NavRoute.Verify(email = state.value.email))
+                                else
+                                    setState { state ->
+                                        state.copy(
+                                            emailError = it.errors.email.firstOrNull() ?: "",
+                                            passwordError = it.errors.password.firstOrNull() ?: "",
+                                        )
+                                    }
+                            }
                         }
                     }
-                }
 
                 setState { it.copy(isLoading = false) }
             }
