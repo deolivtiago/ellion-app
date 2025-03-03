@@ -1,5 +1,6 @@
 package com.clarxlabs.ellion.auth.data.remote.dtos
 
+import com.clarxlabs.ellion.application.utilities.ResultData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,4 +11,4 @@ data class CredentialsData(
 
     @SerialName("password")
     val password: String = ""
-)
+) : ResultData

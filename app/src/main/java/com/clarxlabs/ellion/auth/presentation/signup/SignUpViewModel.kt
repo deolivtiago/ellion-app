@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.application.utilities.Result
-import com.clarxlabs.ellion.application.utilities.ResultError
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.dtos.UserData
 import com.clarxlabs.ellion.auth.data.remote.dtos.UserDataError
@@ -13,27 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-interface TextValidatorResult {
-    object Valid : TextValidatorResult
-    object Error : TextValidatorResult, ResultError
-}
-
-interface ValidationResult
-enum class ValidationResultEnum : ValidationResult, ResultError { VALID, TOO_LONG, TOO_SHORT }
-
-interface TextValidator {
-    fun validate(text: String): Result<TextValidatorResult.Valid, TextValidatorResult.Error>
-}
-
-class LengthValidator(val min: Int = 6, val max: Int = 160) {
-    fun validate(value: String): Result<ValidationResultEnum, ValidationResultEnum> {
-
-        if (value.length > max) return Result.Error(ValidationResultEnum.TOO_LONG)
-
-        return Result.Data(ValidationResultEnum.VALID)
-    }
-}
 
 class SignUpViewModel(private val authDataSource: AuthDataSource) : ViewModel() {
     private val initialState = SignUpModel.State()
@@ -95,15 +73,15 @@ class SignUpViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
                         is Result.Error -> setState { state ->
                             state.copy(
                                 fullNameError = it
-                                    .errors
-                                    .firstName.plus(it.errors.lastName)
+                                    .error
+                                    .firstName.plus(it.error.lastName)
                                     .firstOrNull() ?: "",
                                 emailError = it
-                                    .errors
+                                    .error
                                     .email
                                     .firstOrNull() ?: "",
                                 passwordError = it
-                                    .errors
+                                    .error
                                     .password
                                     .firstOrNull() ?: "",
                             )

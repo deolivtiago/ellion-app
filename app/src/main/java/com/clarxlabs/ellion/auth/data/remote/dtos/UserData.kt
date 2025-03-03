@@ -1,5 +1,6 @@
 package com.clarxlabs.ellion.auth.data.remote.dtos
 
+import com.clarxlabs.ellion.application.utilities.ResultData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -19,4 +20,4 @@ data class UserData(
     val avatarUrl: String = "",
 
     val role: String = "",
-)
+) : ResultData

@@ -1,5 +1,6 @@
 package com.clarxlabs.ellion.auth.domain.entities
 
+import com.clarxlabs.ellion.application.utilities.ResultData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -14,4 +15,4 @@ data class User(
 
     @SerialName("last_name")
     val lastName: String = ""
-)
+) : ResultData

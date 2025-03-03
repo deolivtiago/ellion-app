@@ -8,12 +8,30 @@ import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsData
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsError
 import com.clarxlabs.ellion.auth.data.remote.dtos.TokensData
-import com.clarxlabs.ellion.auth.domain.validation.ValidationComposite
-import com.clarxlabs.ellion.auth.domain.validation.ValidationStrategy
+import com.clarxlabs.ellion.auth.domain.validation.TextValidator
+import com.clarxlabs.ellion.auth.domain.validation.validators.EmailValidator
+import com.clarxlabs.ellion.auth.domain.validation.validators.LengthValidator
+import com.clarxlabs.ellion.auth.domain.validation.validators.RegexValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+enum class TextFieldType(val validators: List<TextValidator>) {
+    EMAIL(listOf(EmailValidator())),
+    PASSWORD(listOf(LengthValidator(), RegexValidator(Regex("\\d+"))))
+}
+
+data class TextFieldMessage(
+    val message: String = "",
+    val isError: Boolean = false,
+)
+
+data class TextFieldState(
+    val value: String,
+    val type: TextFieldType,
+    val message: TextFieldMessage = TextFieldMessage()
+)
 
 class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() {
     private val initialState = SignInModel.State()
@@ -52,33 +70,30 @@ class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
             is SignInModel.Event.OnSubmitClicked -> {
                 setState { it.copy(isLoading = true) }
 
-                val validationResult = ValidationComposite.validate(
-                    mapOf(
-                        ValidationStrategy.Type.EMAIL to state.value.email,
-                        ValidationStrategy.Type.PASSWORD to state.value.password,
-                    )
+                val fields = listOf(
+                    TextFieldState(
+                        state.value.email,
+                        TextFieldType.EMAIL,
+                        TextFieldMessage(
+                            state.value.emailError,
+                            state.value.emailError.isNotEmpty()
+                        )
+                    ),
+                    TextFieldState(
+                        state.value.password,
+                        TextFieldType.PASSWORD,
+                        TextFieldMessage(
+                            state.value.passwordError,
+                            state.value.passwordError.isNotEmpty()
+                        )
+                    ),
                 )
 
-                interface TextValidatorResult
-                interface TextValidator {
-                    fun validate(text: String): TextValidatorResult
-                }
 
-                data class TextFieldType(val label: String = "", validators: List<TextValidator>)
-                data class TextFieldStateMessage(
-                    val isError: Boolean = false,
-                    val message: String = ""
-                )
 
-                data class TextFieldState<T : TextFieldType>(
-                    val type: T,
-                    val value: String,
-                    val message: TextFieldStateMessage = TextFieldStateMessage()
-                )
-
-                if (validationResult[ValidationStrategy.Type.EMAIL] != ValidationStrategy.Result.VALID)
+                if (validationResult[TextValidator.Type.EMAIL] != TextValidator.Result.VALID)
                     setState { it.copy(emailError = "Email inválido") }
-                else if (validationResult[ValidationStrategy.Type.PASSWORD] != ValidationStrategy.Result.VALID)
+                else if (validationResult[TextValidator.Type.PASSWORD] != TextValidator.Result.VALID)
                     setState { it.copy(passwordError = "Senha inválida") }
                 else
                     signIn {
@@ -91,13 +106,13 @@ class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
                             )
 
                             is Result.Error -> {
-                                if (it.errors.email.contains("must be verified"))
+                                if (it.error.email.contains("must be verified"))
                                     event.navigateTo(NavRoute.Verify(email = state.value.email))
                                 else
                                     setState { state ->
                                         state.copy(
-                                            emailError = it.errors.email.firstOrNull() ?: "",
-                                            passwordError = it.errors.password.firstOrNull() ?: "",
+                                            emailError = it.error.email.firstOrNull() ?: "",
+                                            passwordError = it.error.password.firstOrNull() ?: "",
                                         )
                                     }
                             }

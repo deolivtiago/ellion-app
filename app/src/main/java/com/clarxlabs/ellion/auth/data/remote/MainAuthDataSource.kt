@@ -3,6 +3,7 @@ package com.clarxlabs.ellion.auth.data.remote
 import com.clarxlabs.ellion.application.config.APIRoute
 import com.clarxlabs.ellion.application.factories.HttpRequestFactory
 import com.clarxlabs.ellion.application.utilities.Result
+import com.clarxlabs.ellion.application.utilities.ResultData
 import com.clarxlabs.ellion.application.utilities.ResultError
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsData
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsError
@@ -63,7 +64,7 @@ class MainAuthDataSource(private val httpClient: HttpClient) : AuthDataSource {
             .create(HttpMethod.Get, APIRoute.LISTUSERS)
             .execute()
 
-    private suspend inline fun <reified D, reified E : ResultError> mapResult(it: HttpResponse): Result<D, E> {
+    private suspend inline fun <reified D : ResultData, reified E : ResultError> mapResult(it: HttpResponse): Result<D, E> {
         return when (it.status.value) {
             in 200..201 -> {
                 it.body<Result.Data<D, E>>()
