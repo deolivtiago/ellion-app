@@ -8,7 +8,7 @@ import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsData
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsError
 import com.clarxlabs.ellion.auth.data.remote.dtos.TokensData
-import com.clarxlabs.ellion.auth.domain.validation.ValidationFactory
+import com.clarxlabs.ellion.auth.domain.validation.ValidationComposite
 import com.clarxlabs.ellion.auth.domain.validation.ValidationStrategy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,16 +52,34 @@ class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
             is SignInModel.Event.OnSubmitClicked -> {
                 setState { it.copy(isLoading = true) }
 
-                val isEmailValid = ValidationFactory
-                    .create(ValidationStrategy.Type.EMAIL)
-                    .validate(state.value.email) == ValidationStrategy.Result.VALID
+                val validationResult = ValidationComposite.validate(
+                    mapOf(
+                        ValidationStrategy.Type.EMAIL to state.value.email,
+                        ValidationStrategy.Type.PASSWORD to state.value.password,
+                    )
+                )
 
-                val isPasswordValid = ValidationFactory
-                    .create(ValidationStrategy.Type.PASSWORD)
-                    .validate(state.value.password) == ValidationStrategy.Result.VALID
+                interface TextValidatorResult
+                interface TextValidator {
+                    fun validate(text: String): TextValidatorResult
+                }
 
-                if (!isEmailValid) setState { it.copy(emailError = "Email inválido") }
-                else if (!isPasswordValid) setState { it.copy(passwordError = "Senha inválida") }
+                data class TextFieldType(val label: String = "", validators: List<TextValidator>)
+                data class TextFieldStateMessage(
+                    val isError: Boolean = false,
+                    val message: String = ""
+                )
+
+                data class TextFieldState<T : TextFieldType>(
+                    val type: T,
+                    val value: String,
+                    val message: TextFieldStateMessage = TextFieldStateMessage()
+                )
+
+                if (validationResult[ValidationStrategy.Type.EMAIL] != ValidationStrategy.Result.VALID)
+                    setState { it.copy(emailError = "Email inválido") }
+                else if (validationResult[ValidationStrategy.Type.PASSWORD] != ValidationStrategy.Result.VALID)
+                    setState { it.copy(passwordError = "Senha inválida") }
                 else
                     signIn {
                         when (it) {
