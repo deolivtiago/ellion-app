@@ -1,6 +1,5 @@
 package com.clarxlabs.ellion.auth.presentation.signup
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.application.utilities.Result
@@ -8,18 +7,14 @@ import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.dtos.UserData
 import com.clarxlabs.ellion.auth.data.remote.dtos.UserDataError
 import com.clarxlabs.ellion.auth.domain.entities.User
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import com.clarxlabs.ellion.auth.presentation.AppViewModel
 import kotlinx.coroutines.launch
 
-class SignUpViewModel(private val authDataSource: AuthDataSource) : ViewModel() {
-    private val initialState = SignUpModel.State()
-    private val _state = MutableStateFlow(initialState)
-    private val setState = _state::update
-    val state = _state.asStateFlow()
+class SignUpViewModel(
+    private val authDataSource: AuthDataSource
+) : AppViewModel<SignUpModel.State, SignUpModel.Event>(SignUpModel.State()) {
 
-    fun onEvent(event: SignUpModel.Event) {
+    override fun onEvent(event: SignUpModel.Event) {
         when (event) {
             is SignUpModel.Event.OnContactClicked -> {
                 setState { it.copy(isLoading = false, isPasswordVisible = false) }

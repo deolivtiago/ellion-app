@@ -1,31 +1,20 @@
 package com.clarxlabs.ellion.auth.presentation.home
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.inputs.SignOutInput
+import com.clarxlabs.ellion.auth.presentation.AppViewModel
 import io.ktor.client.statement.HttpResponse
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val authDataSource: AuthDataSource,
-    savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-    private val initialState = HomeModel.State(
-        accessToken = savedStateHandle.toRoute<NavRoute.Home>().accessToken,
-        refreshToken = savedStateHandle.toRoute<NavRoute.Home>().refreshToken,
-    )
-    private val _state = MutableStateFlow(initialState)
-    private val setState = _state::update
-    val state = _state.asStateFlow()
+    handle: SavedStateHandle,
+) : AppViewModel<HomeModel.State, HomeModel.Event>(HomeModel.State(handle)) {
 
-    fun onEvent(event: HomeModel.Event) {
+    override fun onEvent(event: HomeModel.Event) {
         when (event) {
             is HomeModel.Event.OnAccessTokenChanged -> {
                 setState { it.copy(accessToken = event.accessToken) }

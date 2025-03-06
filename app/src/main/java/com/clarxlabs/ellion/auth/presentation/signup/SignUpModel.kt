@@ -1,25 +1,28 @@
 package com.clarxlabs.ellion.auth.presentation.signup
 
 import com.clarxlabs.ellion.application.config.NavRoute
+import com.clarxlabs.ellion.auth.presentation.AppModel
 import kotlinx.serialization.Serializable
-import kotlin.String
 
-sealed interface SignUpModel {
+sealed interface SignUpModel : AppModel {
     @Serializable
     data class State(
         val email: String = "deoliv.tiago@gmail.com",
         val password: String = "4m1Mad?",
         val fullName: String = "Tiago de Oliveira",
         val passwordConfirmation: String = "4m1Mad??",
+
         val emailError: String = "",
         val passwordError: String = "",
-        val passwordConfirmationError: String = "As senhas devem ser iguais",
         val fullNameError: String = "",
-        val isPasswordVisible: Boolean = false,
-        val isLoading: Boolean = false,
-    ) : SignUpModel
+        val passwordConfirmationError: String = "As senhas devem ser iguais",
 
-    sealed interface Event {
+        val isPasswordVisible: Boolean = false,
+
+        val isLoading: Boolean = false,
+    ) : AppModel.State<SignUpModel>
+
+    sealed interface Event : AppModel.Event<SignUpModel> {
         data class OnEmailChanged(val email: String) : Event
         data class OnFullNameChanged(val fullName: String) : Event
         data class OnPasswordChanged(val password: String) : Event

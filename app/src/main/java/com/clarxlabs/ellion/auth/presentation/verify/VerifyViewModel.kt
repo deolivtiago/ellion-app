@@ -1,30 +1,20 @@
 package com.clarxlabs.ellion.auth.presentation.verify
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.inputs.VerifyInput
+import com.clarxlabs.ellion.auth.presentation.AppViewModel
 import io.ktor.client.statement.HttpResponse
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class VerifyViewModel(
     private val authDataSource: AuthDataSource,
-    savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-    private val initialState = VerifyModel.State(
-        email = savedStateHandle.toRoute<NavRoute.Verify>().email
-    )
-    private val _state = MutableStateFlow(initialState)
-    private val setState = _state::update
-    val state = _state.asStateFlow()
+    handle: SavedStateHandle,
+) : AppViewModel<VerifyModel.State, VerifyModel.Event>(VerifyModel.State(handle)) {
 
-    fun onEvent(event: VerifyModel.Event) {
+    override fun onEvent(event: VerifyModel.Event) {
         when (event) {
             is VerifyModel.Event.OnContactClicked -> {
                 setState { it.copy(isLoading = false) }

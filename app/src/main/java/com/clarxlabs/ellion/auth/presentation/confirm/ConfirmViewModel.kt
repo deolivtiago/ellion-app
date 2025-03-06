@@ -1,31 +1,21 @@
 package com.clarxlabs.ellion.auth.presentation.confirm
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.inputs.ConfirmInput
 import com.clarxlabs.ellion.auth.data.remote.inputs.VerifyInput
+import com.clarxlabs.ellion.auth.presentation.AppViewModel
 import io.ktor.client.statement.HttpResponse
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ConfirmViewModel(
     private val authDataSource: AuthDataSource,
-    savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-    private val initialState = ConfirmModel.State(
-        email = savedStateHandle.toRoute<NavRoute.Confirm>().email
-    )
-    private val _state = MutableStateFlow(initialState)
-    private val setState = _state::update
-    val state = _state.asStateFlow()
+    handle: SavedStateHandle,
+) : AppViewModel<ConfirmModel.State, ConfirmModel.Event>(ConfirmModel.State(handle)) {
 
-    fun onEvent(event: ConfirmModel.Event) {
+    override fun onEvent(event: ConfirmModel.Event) {
         when (event) {
             is ConfirmModel.Event.OnContactClicked -> {
                 setState { it.copy(isLoading = false) }

@@ -4,12 +4,15 @@ import com.clarxlabs.ellion.auth.presentation.signin.TextFieldState
 import com.clarxlabs.ellion.auth.presentation.signin.TextFieldType
 
 object ValidationComposite {
-    fun validate(fields: List<TextFieldState>): Map<TextFieldType, TextValidatorResult> {
-        return fieldMap.mapValues { (type, value) ->
-            type.validators
-                .map { it.validate(value) }
-                .firstOrNull { it != TextValidator.Result.VALID } // Return the first invalid result
-                ?: TextValidator.Result.VALID // Default to VALID if all pass
-        }
+    fun validate(fields: List<TextFieldState>): Map<TextFieldType, TextValidator.Result> {
+        return fields.map { field ->
+            field.type.to(
+                field.type
+                    .validators
+                    .map { it.validate(field.value) }
+                    .firstOrNull { it != TextValidator.Result.VALID }
+                    ?: TextValidator.Result.VALID
+            )
+        }.toMap()
     }
 }

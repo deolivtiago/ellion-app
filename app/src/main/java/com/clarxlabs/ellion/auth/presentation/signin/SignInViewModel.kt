@@ -1,6 +1,5 @@
 package com.clarxlabs.ellion.auth.presentation.signin
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.application.utilities.Result
@@ -9,16 +8,16 @@ import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsData
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsError
 import com.clarxlabs.ellion.auth.data.remote.dtos.TokensData
 import com.clarxlabs.ellion.auth.domain.validation.TextValidator
+import com.clarxlabs.ellion.auth.domain.validation.ValidationComposite
 import com.clarxlabs.ellion.auth.domain.validation.validators.EmailValidator
 import com.clarxlabs.ellion.auth.domain.validation.validators.LengthValidator
 import com.clarxlabs.ellion.auth.domain.validation.validators.RegexValidator
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import com.clarxlabs.ellion.auth.presentation.AppViewModel
+import com.clarxlabs.ellion.auth.presentation.components.FieldValidator
 import kotlinx.coroutines.launch
 
-enum class TextFieldType(val validators: List<TextValidator>) {
-    EMAIL(listOf(EmailValidator())),
+enum class TextFieldType(val validators: List<TextValidator> = emptyList()) {
+    EMAIL(listOf(LengthValidator(), EmailValidator())),
     PASSWORD(listOf(LengthValidator(), RegexValidator(Regex("\\d+"))))
 }
 
@@ -27,26 +26,53 @@ data class TextFieldMessage(
     val isError: Boolean = false,
 )
 
+interface TextFieldIdentifier
+
 data class TextFieldState(
+    val id: TextFieldIdentifier,
     val value: String,
+    val validator: TextValidator,
     val type: TextFieldType,
     val message: TextFieldMessage = TextFieldMessage()
 )
 
-class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() {
-    private val initialState = SignInModel.State()
-    private val _state = MutableStateFlow(initialState)
-    private val setState = _state::update
-    val state = _state.asStateFlow()
+class SignInViewModel(
+    private val authDataSource: AuthDataSource,
+) : AppViewModel<SignInModel.State, SignInModel.Event>(SignInModel.State()) {
 
-    fun onEvent(event: SignInModel.Event) {
+    fun mapErrorMessage(result: TextValidator.Result): String {
+        return when (result) {
+            TextValidator.Result.INVALID_FORMAT -> "Formato inválido"
+            TextValidator.Result.TOO_SHORT -> "Muito curto"
+            TextValidator.Result.TOO_LONG -> "Muito longo"
+            else -> ""
+        }
+    }
+
+    override fun onEvent(event: SignInModel.Event) {
         when (event) {
             is SignInModel.Event.OnEmailChanged -> {
-                setState { it.copy(email = event.email, emailError = "") }
+                setState {
+                    it.copy(
+                        email = event.email,
+                        emailError = FieldValidator
+                            .Email()
+                            .validate(event.email)
+                            .let(::mapErrorMessage)
+                    )
+                }
             }
 
             is SignInModel.Event.OnPasswordChanged -> {
-                setState { it.copy(password = event.password, passwordError = "") }
+                setState {
+                    it.copy(
+                        password = event.password,
+                        passwordError = FieldValidator
+                            .Password()
+                            .validate(event.password)
+                            .let(::mapErrorMessage)
+                    )
+                }
             }
 
             is SignInModel.Event.OnPasswordVisibilityClicked -> {
@@ -70,32 +96,16 @@ class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
             is SignInModel.Event.OnSubmitClicked -> {
                 setState { it.copy(isLoading = true) }
 
-                val fields = listOf(
-                    TextFieldState(
-                        state.value.email,
-                        TextFieldType.EMAIL,
-                        TextFieldMessage(
-                            state.value.emailError,
-                            state.value.emailError.isNotEmpty()
-                        )
-                    ),
-                    TextFieldState(
-                        state.value.password,
-                        TextFieldType.PASSWORD,
-                        TextFieldMessage(
-                            state.value.passwordError,
-                            state.value.passwordError.isNotEmpty()
-                        )
-                    ),
-                )
+                val errors = ValidationComposite
+                    .validate(listOf())
+                    .filterValues { it != TextValidator.Result.VALID }
 
-
-
-                if (validationResult[TextValidator.Type.EMAIL] != TextValidator.Result.VALID)
-                    setState { it.copy(emailError = "Email inválido") }
-                else if (validationResult[TextValidator.Type.PASSWORD] != TextValidator.Result.VALID)
-                    setState { it.copy(passwordError = "Senha inválida") }
-                else
+                if (errors.isNotEmpty()) {
+                    if (errors.containsKey(TextFieldType.EMAIL))
+                        setState { it.copy(emailError = "Email inválido") }
+                    if (errors.containsKey(TextFieldType.PASSWORD))
+                        setState { it.copy(passwordError = "Senha inválida") }
+                } else
                     signIn {
                         when (it) {
                             is Result.Data -> event.navigateTo(
@@ -140,4 +150,5 @@ class SignInViewModel(private val authDataSource: AuthDataSource) : ViewModel() 
 
         viewModelScope.launch { onResponse(authDataSource.signIn(input)) }
     }
+
 }

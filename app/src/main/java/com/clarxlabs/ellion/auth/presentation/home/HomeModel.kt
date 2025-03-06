@@ -1,17 +1,26 @@
 package com.clarxlabs.ellion.auth.presentation.home
 
+import androidx.lifecycle.SavedStateHandle
+import androidx.navigation.toRoute
 import com.clarxlabs.ellion.application.config.NavRoute
+import com.clarxlabs.ellion.auth.presentation.AppModel
 import kotlinx.serialization.Serializable
 
-sealed interface HomeModel {
+sealed interface HomeModel : AppModel {
     @Serializable
     data class State(
         val accessToken: String = "jwt.access.token",
         val refreshToken: String = "jwt.refresh.token",
-        val isLoading: Boolean = false,
-    ) : HomeModel
 
-    sealed interface Event {
+        val isLoading: Boolean = false,
+    ) : AppModel.State<HomeModel> {
+        constructor(handle: SavedStateHandle) : this(
+            accessToken = handle.toRoute<NavRoute.Home>().accessToken,
+            refreshToken = handle.toRoute<NavRoute.Home>().refreshToken,
+        )
+    }
+
+    sealed interface Event : AppModel.Event<HomeModel> {
         data class OnAccessTokenChanged(val accessToken: String) : Event
         data class OnRefreshTokenChanged(val refreshToken: String) : Event
         data class OnSignOutClicked(val navigateTo: (NavRoute) -> Unit) : Event

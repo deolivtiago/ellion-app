@@ -1,20 +1,24 @@
 package com.clarxlabs.ellion.auth.presentation.signin
 
 import com.clarxlabs.ellion.application.config.NavRoute
+import com.clarxlabs.ellion.auth.presentation.AppModel
 import kotlinx.serialization.Serializable
 
-sealed interface SignInModel {
+sealed interface SignInModel : AppModel {
     @Serializable
     data class State(
         val email: String = "deoliv.tiago@gmail.com",
-        val emailError: String = "",
         val password: String = "4m1Mad?",
-        val passwordError: String = "",
-        val isPasswordVisible: Boolean = false,
-        val isLoading: Boolean = false,
-    ) : SignInModel
 
-    sealed interface Event {
+        val emailError: String = "",
+        val passwordError: String = "",
+
+        val isPasswordVisible: Boolean = false,
+
+        val isLoading: Boolean = false,
+    ) : AppModel.State<SignInModel>
+
+    sealed interface Event : AppModel.Event<SignInModel> {
         data class OnEmailChanged(val email: String) : Event
         data class OnPasswordChanged(val password: String) : Event
         data object OnPasswordVisibilityClicked : Event
