@@ -24,5 +24,6 @@ object ValidatorFactory {
         FULL_NAME(fullNameValidatorComposite::validate),
         PASSWORD_CONFIRMATION,
     }
-    
+
+    fun create() = ValidatorStrategy.EMAIL
 }

@@ -5,7 +5,6 @@ import com.clarxlabs.ellion.auth.domain.validation.TextValidatorComposite
 import com.clarxlabs.ellion.auth.domain.validation.validators.EmailValidator
 import com.clarxlabs.ellion.auth.domain.validation.validators.LengthValidator
 import com.clarxlabs.ellion.auth.domain.validation.validators.RegexValidator
-import kotlinx.serialization.Serializable
 
 val emailValidatorComposite =
     TextValidatorComposite(listOf(LengthValidator(), EmailValidator()))
@@ -35,37 +34,20 @@ sealed interface FieldValidator {
 //        val validate: (text: String, other: String) -> TextValidator.Result = { _, _ -> TextValidator.Result.VALID }
 //    ) : FieldValidator
 
-data class FieldMessage(
-    val message: String = "",
-    val isError: Boolean = false,
-)
 
-@Serializable
-data class FieldState(
-    val label: String,
-    val text: String,
-    val textError: String = "",
-    val isVisible: Boolean = true,
-//    val message: FieldMessage = FieldMessage(),
-)
+data class Field<T>(val text: String, val validator: T)
 
-data class FormField<T>(val state: FieldState, val validator: T)
-
-val emailState = FieldState("email", "")
 val emailValidator = FieldValidator.Email()
-
-val emailField = FormField(emailState, emailValidator)
-
-val passwordState = FieldState("password", "")
 val passwordValidator = FieldValidator.Password()
 
-val passwordField = FormField(passwordState, passwordValidator)
+val emailField = Field("", emailValidator)
+val passwordField = Field("", passwordValidator)
 
 val emailError = emailValidator
-    .validate(emailState.text)
+    .validate(emailField.text)
     .let { if (it == TextValidator.Result.INVALID_FORMAT) "Email inválido" else "" }
 
 val isFormValid =
     listOf(emailField, passwordField)
-        .map { it.validator.validate(it.state.text) }
+        .map { it.validator.validate(it.text) }
         .all { it == TextValidator.Result.VALID }

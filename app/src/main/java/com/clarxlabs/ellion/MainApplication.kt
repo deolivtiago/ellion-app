@@ -10,6 +10,8 @@ import com.clarxlabs.ellion.application.factories.HttpClientFactory
 import com.clarxlabs.ellion.application.theme.EllionTheme
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.MainAuthDataSource
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationServiceImpl
 import com.clarxlabs.ellion.auth.presentation.confirm.ConfirmView
 import com.clarxlabs.ellion.auth.presentation.confirm.ConfirmViewModel
 import com.clarxlabs.ellion.auth.presentation.home.HomeView
@@ -33,6 +35,7 @@ import org.koin.dsl.module
 val appModule = module {
     singleOf(HttpClientFactory::create).bind<HttpClient>()
     singleOf(::MainAuthDataSource).bind<AuthDataSource>()
+    singleOf(::AuthenticationServiceImpl).bind<AuthenticationService>()
 
     viewModelOf(::SignInViewModel)
     viewModelOf(::SignUpViewModel)

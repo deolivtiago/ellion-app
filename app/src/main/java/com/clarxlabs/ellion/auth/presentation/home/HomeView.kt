@@ -160,12 +160,14 @@ fun HomeViewContent(
             }
         }
     }) {
-        Scaffold(modifier = Modifier
-            .navigationBarsPadding()
-            .fillMaxSize(),
+        Scaffold(
+            modifier = Modifier
+                .navigationBarsPadding()
+                .fillMaxSize(),
 
             topBar = {
-                TopAppBar(title = { Text("Ellion") },
+                TopAppBar(
+                    title = { Text("Ellion") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,

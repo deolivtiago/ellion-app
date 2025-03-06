@@ -2,13 +2,10 @@ package com.clarxlabs.ellion.auth.presentation.signin
 
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
-import com.clarxlabs.ellion.application.utilities.Result
-import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
-import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsData
-import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsError
-import com.clarxlabs.ellion.auth.data.remote.dtos.TokensData
+import com.clarxlabs.ellion.application.utilities.Either
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.SignIn
 import com.clarxlabs.ellion.auth.domain.validation.TextValidator
-import com.clarxlabs.ellion.auth.domain.validation.ValidationComposite
 import com.clarxlabs.ellion.auth.domain.validation.validators.EmailValidator
 import com.clarxlabs.ellion.auth.domain.validation.validators.LengthValidator
 import com.clarxlabs.ellion.auth.domain.validation.validators.RegexValidator
@@ -37,7 +34,7 @@ data class TextFieldState(
 )
 
 class SignInViewModel(
-    private val authDataSource: AuthDataSource,
+    private val authService: AuthenticationService,
 ) : AppViewModel<SignInModel.State, SignInModel.Event>(SignInModel.State()) {
 
     fun mapErrorMessage(result: TextValidator.Result): String {
@@ -96,38 +93,28 @@ class SignInViewModel(
             is SignInModel.Event.OnSubmitClicked -> {
                 setState { it.copy(isLoading = true) }
 
-                val errors = ValidationComposite
-                    .validate(listOf())
-                    .filterValues { it != TextValidator.Result.VALID }
-
-                if (errors.isNotEmpty()) {
-                    if (errors.containsKey(TextFieldType.EMAIL))
-                        setState { it.copy(emailError = "Email inválido") }
-                    if (errors.containsKey(TextFieldType.PASSWORD))
-                        setState { it.copy(passwordError = "Senha inválida") }
-                } else
-                    signIn {
-                        when (it) {
-                            is Result.Data -> event.navigateTo(
-                                NavRoute.Home(
-                                    accessToken = it.data.accessToken,
-                                    refreshToken = it.data.refreshToken,
-                                )
+                signIn { result ->
+                    when (result) {
+                        is Either.Success -> event.navigateTo(
+                            NavRoute.Home(
+                                accessToken = result.output.accessToken,
+                                refreshToken = result.output.refreshToken,
                             )
+                        )
 
-                            is Result.Error -> {
-                                if (it.error.email.contains("must be verified"))
-                                    event.navigateTo(NavRoute.Verify(email = state.value.email))
-                                else
-                                    setState { state ->
-                                        state.copy(
-                                            emailError = it.error.email.firstOrNull() ?: "",
-                                            passwordError = it.error.password.firstOrNull() ?: "",
-                                        )
-                                    }
-                            }
+                        is Either.Error -> {
+                            if (result.output.email == "must be verified")
+                                event.navigateTo(NavRoute.Verify(state.value.email))
+                            else
+                                setState {
+                                    it.copy(
+                                        emailError = result.output.email,
+                                        passwordError = result.output.password
+                                    )
+                                }
                         }
                     }
+                }
 
                 setState { it.copy(isLoading = false) }
             }
@@ -142,13 +129,12 @@ class SignInViewModel(
         }
     }
 
-    private fun signIn(onResponse: (Result<TokensData, CredentialsError>) -> Unit) {
-        val input = CredentialsData(
+    private fun signIn(onResponse: (Either<SignIn.Output, SignIn.Error>) -> Unit) {
+        val input = SignIn.Input(
             email = state.value.email,
             password = state.value.password
         )
 
-        viewModelScope.launch { onResponse(authDataSource.signIn(input)) }
+        viewModelScope.launch { onResponse(authService.signIn(input)) }
     }
-
 }
