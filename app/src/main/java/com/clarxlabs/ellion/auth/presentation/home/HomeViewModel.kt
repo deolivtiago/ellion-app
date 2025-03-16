@@ -1,5 +1,6 @@
 package com.clarxlabs.ellion.auth.presentation.home
 
+import android.util.Patterns
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
@@ -37,8 +38,55 @@ class HomeViewModel(
 
                 setState { it.copy(isLoading = false) }
             }
+
+            is HomeModel.Event.OnEmailChanged -> {
+//                setState { it.copy(input = it.input.copy(email = event.text)) }
+//                setState { it.copy(error = it.input.emailError()) }
+
+                setState { it.copy(email = event.text) }
+            }
+
+            is HomeModel.Event.OnPasswordChanged -> {
+//                setState {
+//                    it.copy(
+//                        input = it.input.copy(password = event.text),
+//                        error = it.input.passwordError(),
+//                    )
+//                }
+                setState { it.copy(password = event.text) }
+            }
+
+            is HomeModel.Event.OnSubmitClicked -> {}
         }
     }
+
+    private fun validate() {
+
+        setState {
+            it.copy(
+                emailError = if (state.value.email.isEmpty()) "Campo obrigatório" else "",
+                passwordError = if (state.value.password.isEmpty()) "Campo obrigatório" else ""
+            )
+        }
+
+    }
+
+    private fun validateEmail(text: String) =
+        Patterns.EMAIL_ADDRESS.matcher(text).matches().let {
+            when (it) {
+                true -> ValidationError.VALID
+                false -> ValidationError.INVALID_FORMAT
+            }
+        }
+
+    private fun errorMessage(error: ValidationError): String {
+        val validationMessages = mapOf<ValidationError, String>(
+            ValidationError.INVALID_FORMAT.to("Formato inválido"),
+        )
+
+        return error.let { validationMessages.getOrDefault(it, "") }
+    }
+
 
     private fun signOut(onResponse: (HttpResponse) -> Unit) {
         val input = SignOutInput(state.value.accessToken, state.value.refreshToken)
@@ -46,3 +94,5 @@ class HomeViewModel(
         viewModelScope.launch { onResponse(authDataSource.signOut(input)) }
     }
 }
+
+enum class ValidationError { INVALID_FORMAT, VALID }

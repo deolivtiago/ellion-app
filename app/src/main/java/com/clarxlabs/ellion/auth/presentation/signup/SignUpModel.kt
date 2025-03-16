@@ -15,24 +15,32 @@ sealed interface SignUpModel : AppModel {
         val emailError: String = "",
         val passwordError: String = "",
         val fullNameError: String = "",
-        val passwordConfirmationError: String = "As senhas devem ser iguais",
+        val passwordConfirmationError: String = "",
 
         val isPasswordVisible: Boolean = false,
 
         val isLoading: Boolean = false,
-    ) : AppModel.State<SignUpModel>
+    ) : AppModel.State {
+        fun firstName(): String =
+            fullName.replace("  ", " ").substringBefore(" ").trim()
+                .replaceFirstChar { it.uppercase() }
 
-    sealed interface Event : AppModel.Event<SignUpModel> {
-        data class OnEmailChanged(val email: String) : Event
-        data class OnFullNameChanged(val fullName: String) : Event
-        data class OnPasswordChanged(val password: String) : Event
-        data class OnPasswordConfirmationChanged(val passwordConfirmation: String) : Event
+        fun lastName(): String =
+            fullName.replace("  ", " ").substringAfter(" ", "").trimStart().split(" ")
+                .joinToString(" ") { if (it.length > 2) it.replaceFirstChar { it.uppercase() } else it }
+    }
+
+    sealed interface Event : AppModel.Event {
+        data class OnEmailChanged(val text: String) : Event
+        data class OnFullNameChanged(val text: String) : Event
+        data class OnPasswordChanged(val text: String) : Event
+        data class OnPasswordConfirmationChanged(val text: String) : Event
         data class OnSubmitClicked(val navigateTo: (NavRoute) -> Unit) : Event
-        data object OnPasswordVisibilityClicked : Event
-        data object OnResetPasswordClicked : Event
-        data object OnContactClicked : Event
+        data class OnPasswordVisibilityClicked(val navigateTo: (NavRoute) -> Unit) : Event
+        data class OnResetPasswordClicked(val navigateTo: (NavRoute) -> Unit) : Event
+        data class OnContactClicked(val navigateTo: (NavRoute) -> Unit) : Event
         data class OnSignInClicked(val navigateTo: (NavRoute) -> Unit) : Event
-        data object OnTermsClicked : Event
-        data object OnPoliciesClicked : Event
+        data class OnTermsClicked(val navigateTo: (NavRoute) -> Unit) : Event
+        data class OnPoliciesClicked(val navigateTo: (NavRoute) -> Unit) : Event
     }
 }

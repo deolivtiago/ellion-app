@@ -3,6 +3,7 @@ package com.clarxlabs.ellion.auth.presentation.home
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.toRoute
 import com.clarxlabs.ellion.application.config.NavRoute
+import com.clarxlabs.ellion.auth.domain.services.models.LoginInput
 import com.clarxlabs.ellion.auth.presentation.AppModel
 import kotlinx.serialization.Serializable
 
@@ -11,19 +12,29 @@ sealed interface HomeModel : AppModel {
     data class State(
         val accessToken: String = "jwt.access.token",
         val refreshToken: String = "jwt.refresh.token",
+        val input: LoginInput = LoginInput(),
+        val error: LoginInput = LoginInput(),
+
+        val email: String = "deoliv.tiago@gmail.com",
+        val emailError: String = "",
+        val password: String = "4m1Mad?",
+        val passwordError: String = "",
 
         val isLoading: Boolean = false,
-    ) : AppModel.State<HomeModel> {
+    ) : AppModel.State {
         constructor(handle: SavedStateHandle) : this(
             accessToken = handle.toRoute<NavRoute.Home>().accessToken,
             refreshToken = handle.toRoute<NavRoute.Home>().refreshToken,
         )
     }
 
-    sealed interface Event : AppModel.Event<HomeModel> {
+    sealed interface Event : AppModel.Event {
         data class OnAccessTokenChanged(val accessToken: String) : Event
         data class OnRefreshTokenChanged(val refreshToken: String) : Event
         data class OnSignOutClicked(val navigateTo: (NavRoute) -> Unit) : Event
+        data class OnEmailChanged(val text: String) : Event
+        data class OnPasswordChanged(val text: String) : Event
+        data class OnSubmitClicked(val navigateTo: (NavRoute) -> Unit) : Event
     }
 }
 

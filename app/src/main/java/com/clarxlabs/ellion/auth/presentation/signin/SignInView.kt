@@ -109,26 +109,29 @@ fun SignInViewContent(
                     }
                 }
 
-                CredentialsFormFields(
-                    email = state.email,
-                    emailErrorMessage = state.emailError,
-                    onEmailChanged = { onEvent(SignInModel.Event.OnEmailChanged(it)) },
-                    password = state.password,
-                    passwordErrorMessage = state.passwordError,
-                    onPasswordChanged = { onEvent(SignInModel.Event.OnPasswordChanged(it)) },
-                    isPasswordVisible = state.isPasswordVisible,
-                    onPasswordVisibilityClicked = { onEvent(SignInModel.Event.OnPasswordVisibilityClicked) },
-                    isLoading = state.isLoading,
-                )
+                Column {
+                    CredentialsFormFields(
+                        email = state.email,
+                        emailErrorMessage = state.emailError,
+                        onEmailChanged = { onEvent(SignInModel.Event.OnEmailChanged(it)) },
+                        password = state.password,
+                        passwordErrorMessage = state.passwordError,
+                        onPasswordChanged = { onEvent(SignInModel.Event.OnPasswordChanged(it)) },
+                        isPasswordVisible = state.isPasswordVisible,
+                        onPasswordVisibilityClicked = { onEvent(SignInModel.Event.OnPasswordVisibilityClicked) },
+                        isLoading = state.isLoading,
+                    )
 
-                ActionButton(
-                    onClicked = { onEvent(SignInModel.Event.OnSubmitClicked(onNavigate)) },
-                    isLoading = state.isLoading,
-                )
+                    ActionButton(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        onClicked = { onEvent(SignInModel.Event.OnSubmitClicked(onNavigate)) },
+                        isLoading = state.isLoading,
+                    )
+                }
 
                 TermsAndPolicies(
-                    onTermsClicked = { onEvent(SignInModel.Event.OnTermsClicked) },
-                    onPoliciesClicked = { onEvent(SignInModel.Event.OnPoliciesClicked) }
+                    onTermsClicked = { onEvent(SignInModel.Event.OnTermsClicked(onNavigate)) },
+                    onPoliciesClicked = { onEvent(SignInModel.Event.OnPoliciesClicked(onNavigate)) }
                 )
 
                 QuestionButton(

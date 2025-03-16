@@ -1,20 +1,22 @@
 package com.clarxlabs.ellion.auth.domain.validation.validators
 
-import android.util.Patterns
 import com.clarxlabs.ellion.application.utilities.Either
 import com.clarxlabs.ellion.auth.domain.validation.TextValidator
 
-class EmailValidator : TextValidator {
+class SymbolsValidator(
+    val permitted: String = ".!?@#%^&*_+-$,",
+    val min: Int = 1,
+) : TextValidator {
 
     override fun validate(text: String): Either<String, Error> {
-        val isValidEmail = Patterns.EMAIL_ADDRESS.matcher(text).matches()
+        val symbols = text.filter { permitted.contains(it) }
 
-        if (!isValidEmail) return Either.Failure(Error.InvalidFormat)
+        if (symbols.length < min) return Either.Failure(Error.AtLeast(min))
 
         return Either.Success(text)
     }
 
     interface Error : TextValidator.Error {
-        data object InvalidFormat : Error
+        data class AtLeast(val min: Int) : Error
     }
 }

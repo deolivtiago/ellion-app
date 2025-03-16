@@ -2,7 +2,6 @@ package com.clarxlabs.ellion.auth.presentation.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -21,11 +20,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.clarxlabs.ellion.application.theme.EllionTheme
 
 @Composable
 fun CredentialsFormFields(
+    modifier: Modifier = Modifier,
     email: String = "",
     emailErrorMessage: String = "",
     onEmailChanged: (String) -> Unit = {},
@@ -36,44 +35,32 @@ fun CredentialsFormFields(
     onPasswordVisibilityClicked: () -> Unit = {},
     isEnabled: Boolean = true,
     isLoading: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChanged,
             isError = emailErrorMessage.isNotEmpty(),
-            supportingText = if (emailErrorMessage.isNotEmpty()) {
-                { Text(text = emailErrorMessage) }
-            } else null,
+            supportingText = { Text(text = emailErrorMessage).takeUnless { emailErrorMessage.isEmpty() } },
             label = { Text("Email") },
             shape = MaterialTheme.shapes.large,
             enabled = !isLoading and isEnabled,
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Email,
-                    contentDescription = "Email icon"
-                )
+                Icon(imageVector = Icons.Default.Email, contentDescription = "Email icon")
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(2.dp),
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
         )
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChanged,
             isError = passwordErrorMessage.isNotEmpty(),
-            supportingText = if (passwordErrorMessage.isNotEmpty()) {
-                { Text(text = passwordErrorMessage) }
-            } else null,
+            supportingText = { Text(text = passwordErrorMessage).takeUnless { passwordErrorMessage.isEmpty() } },
             label = { Text("Senha") },
             shape = MaterialTheme.shapes.large,
             enabled = !isLoading and isEnabled,
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = "Password icon"
-                )
+                Icon(imageVector = Icons.Default.Lock, contentDescription = "Password icon")
             },
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -88,9 +75,8 @@ fun CredentialsFormFields(
                     )
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(2.dp),
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

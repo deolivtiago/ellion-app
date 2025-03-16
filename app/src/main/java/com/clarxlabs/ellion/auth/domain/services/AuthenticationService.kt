@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 interface AuthenticationService {
     suspend fun signIn(input: SignIn.Input): Either<SignIn.Output, SignIn.Error>
     suspend fun signUp(input: SignUp.Input): Either<SignUp.Output, SignUp.Error>
+    suspend fun signOut(input: SignOut.Input): Either<SignOut.Output, SignOut.Error>
+    suspend fun verify(input: Verify.Input): Either<Verify.Output, Verify.Error>
+    suspend fun confirm(input: Confirm.Input): Either<Confirm.Output, Confirm.Error>
 
     interface SignIn {
         @Serializable
@@ -66,5 +69,45 @@ interface AuthenticationService {
             val lastName: String = "",
             val role: String = "",
         )
+    }
+
+    interface SignOut {
+        @Serializable
+        data class Input(
+            @SerialName("access_token")
+            val accessToken: String,
+            @SerialName("refresh_token")
+            val refreshToken: String,
+        )
+
+        object Output
+
+        @Serializable
+        data class Error(
+            @SerialName("access_token")
+            val accessToken: String,
+            @SerialName("refresh_token")
+            val refreshToken: String,
+        )
+    }
+
+    interface Verify {
+        @Serializable
+        data class Input(val email: String)
+
+        object Output
+
+        @Serializable
+        data class Error(val email: String = "")
+    }
+
+    interface Confirm {
+        @Serializable
+        data class Input(val email: String, val code: String)
+
+        object Output
+
+        @Serializable
+        data class Error(val email: String = "", val code: String = "")
     }
 }

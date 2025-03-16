@@ -15,13 +15,13 @@ sealed interface ConfirmModel : AppModel {
         val codeError: String = "",
 
         val isLoading: Boolean = false,
-    ) : AppModel.State<ConfirmModel> {
+    ) : AppModel.State {
         constructor(handle: SavedStateHandle) : this(
             email = handle.toRoute<NavRoute.Confirm>().email
         )
     }
 
-    sealed interface Event : AppModel.Event<ConfirmModel> {
+    sealed interface Event : AppModel.Event {
         data class OnCodeChanged(val code: String) : Event
         data class OnSubmitClicked(val navigateTo: (NavRoute) -> Unit) : Event
         data object OnContactClicked : Event

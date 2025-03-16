@@ -33,12 +33,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.application.theme.EllionTheme
 import com.clarxlabs.ellion.auth.presentation.components.ActionButton
+import com.clarxlabs.ellion.auth.presentation.components.CredentialsFormFields
 import kotlinx.coroutines.launch
 
 
@@ -201,8 +203,33 @@ fun HomeViewContent(
                         .fillMaxSize()
                         .weight(1f)
                 ) {
-                    Text(text = state.accessToken)
-                    Text(text = state.refreshToken)
+                    Text(
+                        text = "Access token: ${state.accessToken}",
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = "Refresh token: ${state.refreshToken}",
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+
+                    CredentialsFormFields(
+                        email = state.email,
+                        emailErrorMessage = state.emailError,
+                        onEmailChanged = { onEvent(HomeModel.Event.OnEmailChanged(it)) },
+                        password = state.password,
+                        passwordErrorMessage = state.passwordError,
+                        onPasswordChanged = { onEvent(HomeModel.Event.OnPasswordChanged(it)) },
+                        isPasswordVisible = true,
+                        isLoading = state.isLoading,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+
+                    ActionButton(
+                        onClicked = { onEvent(HomeModel.Event.OnSubmitClicked(onNavigate)) },
+                        isLoading = state.isLoading,
+                    )
                 }
 
 

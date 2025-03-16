@@ -12,13 +12,13 @@ sealed interface VerifyModel : AppModel {
         val email: String = "invalid@mail.com",
 
         val isLoading: Boolean = false,
-    ) : AppModel.State<VerifyModel> {
+    ) : AppModel.State {
         constructor(handle: SavedStateHandle) : this(
             email = handle.toRoute<NavRoute.Confirm>().email
         )
     }
 
-    sealed interface Event : AppModel.Event<VerifyModel> {
+    sealed interface Event : AppModel.Event {
         data class OnSubmitClicked(val navigateTo: (NavRoute) -> Unit) : Event
         data object OnContactClicked : Event
         data class OnConfirmClicked(val navigateTo: (NavRoute) -> Unit) : Event

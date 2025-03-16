@@ -7,6 +7,5 @@ sealed interface Either<out S, out E> {
     data class Success<out S, out E>(val output: S) : Either<S, E>
 
     @Serializable
-    data class Error<out S, out E>(val output: E) : Either<S, E>
+    data class Failure<out S, out E>(val output: E) : Either<S, E>
 }
-

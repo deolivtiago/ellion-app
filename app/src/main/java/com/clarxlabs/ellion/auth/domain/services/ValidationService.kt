@@ -1,23 +1,16 @@
 package com.clarxlabs.ellion.auth.domain.services
 
-import com.clarxlabs.ellion.auth.domain.DomainService
-import com.clarxlabs.ellion.auth.domain.services.ValidationService.Error
-import com.clarxlabs.ellion.auth.domain.services.ValidationService.Input
-import com.clarxlabs.ellion.auth.domain.services.ValidationService.Output
+import com.clarxlabs.ellion.application.utilities.Either
+import com.clarxlabs.ellion.application.utilities.validation.TextFieldValidation.Strategy
+import com.clarxlabs.ellion.application.utilities.validation.TextValidation
 
-interface ValidationService : DomainService<Input, Output, Error> {
-    data class Input(
-        val email: String,
-        val password: String,
-    ) : DomainService.Input
+interface ValidationService {
+    fun validate(text: String, strategy: Strategy): Either<String, TextValidation.Error>
+    fun validateFields(input: Validate.Input): Either<Validate.Output, Validate.Error>
 
-    data class Output(
-        val email: String,
-        val password: String,
-    ) : DomainService.Output
-
-    data class Error(
-        val email: List<String> = emptyList(),
-        val password: List<String> = emptyList(),
-    ) : DomainService.Error
+    sealed interface Validate {
+        data class Input(val fields: Map<Strategy, String> = emptyMap())
+        data class Output(val fields: Map<Strategy, String> = emptyMap())
+        data class Error(val fields: Map<Strategy, String> = emptyMap())
+    }
 }

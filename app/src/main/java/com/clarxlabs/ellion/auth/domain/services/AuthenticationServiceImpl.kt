@@ -5,30 +5,53 @@ import com.clarxlabs.ellion.application.utilities.Result
 import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
 import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsData
 import com.clarxlabs.ellion.auth.data.remote.dtos.UserData
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.Confirm
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.SignIn
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.SignOut
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.SignUp
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.Verify
 import com.clarxlabs.ellion.auth.domain.validation.TextValidator
-import kotlin.collections.Map.Entry
+import com.clarxlabs.ellion.auth.domain.validation.validators.EmailValidator
+import com.clarxlabs.ellion.auth.domain.validation.validators.LengthValidator
+import com.clarxlabs.ellion.auth.domain.validation.validators.LowerCaseValidator
+import com.clarxlabs.ellion.auth.domain.validation.validators.NumbersValidator
+import com.clarxlabs.ellion.auth.domain.validation.validators.SymbolsValidator
+import com.clarxlabs.ellion.auth.domain.validation.validators.UpperCaseValidator
 
 class AuthenticationServiceImpl(
     private val authDataSource: AuthDataSource,
 ) : AuthenticationService {
     override suspend fun signIn(input: SignIn.Input): Either<SignIn.Output, SignIn.Error> {
-        return validateInput(input).let {
-            when (it) {
-                is Either.Error -> Either.Error(it.output)
-                is Either.Success -> doSignIn(it.output)
-            }
-        }
+//        return validateInput(input).let {
+//            when (it) {
+//                is Either.Failure -> Either.Failure(it.output)
+//                is Either.Success -> doSignIn(it.output)
+//            }
+//        }
+
+        return doSignIn(input)
     }
 
     override suspend fun signUp(input: SignUp.Input): Either<SignUp.Output, SignUp.Error> {
-        return validateInput(input).let {
-            when (it) {
-                is Either.Error -> Either.Error(it.output)
-                is Either.Success -> doSignUp(it.output)
-            }
-        }
+//        return validateInput(input).let {
+//            when (it) {
+//                is Either.Failure -> Either.Failure(it.output)
+//                is Either.Success -> doSignUp(it.output)
+//            }
+//        }
+        return doSignUp(input)
+    }
+
+    override suspend fun signOut(input: SignOut.Input): Either<SignOut.Output, SignOut.Error> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun verify(input: Verify.Input): Either<Verify.Output, Verify.Error> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun confirm(input: Confirm.Input): Either<Confirm.Output, Confirm.Error> {
+        TODO("Not yet implemented")
     }
 
     private suspend fun doSignIn(it: SignIn.Input): Either<SignIn.Output, SignIn.Error> {
@@ -46,7 +69,7 @@ class AuthenticationServiceImpl(
                     )
                 )
 
-                is Result.Error -> Either.Error(
+                is Result.Error -> Either.Failure(
                     SignIn.Error(
                         email = it.error.email.first(),
                         password = it.error.password.first(),
@@ -76,7 +99,7 @@ class AuthenticationServiceImpl(
                     )
                 )
 
-                is Result.Error -> Either.Error(
+                is Result.Error -> Either.Failure(
                     SignUp.Error(
                         email = it.error.email.first(),
                         password = it.error.password.first(),
@@ -89,81 +112,62 @@ class AuthenticationServiceImpl(
         }
     }
 
-    private fun validateInput(it: SignIn.Input): Either<SignIn.Input, SignIn.Error> {
-        val errors = mapOf(
-            ValidationType.EMAIL.to(it.email),
-            ValidationType.PASSWORD.to(it.password)
-        )
-            .map(::validateField).toMap()
-            .map(::mapFieldError).toMap()
+//    private fun validateInput(it: SignIn.Input): Either<SignIn.Input, SignIn.Failure> {
+//        val errors = mapOf(
+//            ValidationType.EMAIL.to(it.email),
+//            ValidationType.PASSWORD.to(it.password)
+//        )
+//            .map(::validateField).toMap()
+//            .map(::mapFieldError).toMap()
+//
+//        return errors.values.all { it.isEmpty() }
+//            .let { isValid ->
+//                if (isValid) Either.Success(it)
+//                else Either.Failure(
+//                    SignIn.Failure(
+//                        email = errors[ValidationType.EMAIL]!!,
+//                        password = errors[ValidationType.PASSWORD]!!,
+//                    )
+//                )
+//            }
+//    }
+//
+//    private fun validateInput(it: SignUp.Input): Either<SignUp.Input, SignUp.Failure> {
+//        val errors = mapOf(
+//            ValidationType.EMAIL.to(it.email),
+//            ValidationType.PASSWORD.to(it.password),
+//            ValidationType.FIRST_NAME.to(it.firstName),
+//            ValidationType.LAST_NAME.to(it.lastName),
+//        )
+//            .map(::validateField).toMap<ValidationType, String>()
+//            .map(::mapFieldError).toMap()
+//
+//        return
+////        errors.values.all { it.isEmpty() }
+////            .let { isValid ->
+////                if (isValid) Either.Success(it)
+////                else
+//                    Either.Failure(
+//                    SignUp.Failure(
+//                        email = errors[ValidationType.EMAIL]!!,
+//                        password = errors[ValidationType.PASSWORD]!!,
+//                        firstName = errors[ValidationType.FIRST_NAME]!!,
+//                        lastName = errors[ValidationType.LAST_NAME]!!,
+//                    )
+//                )
+////            }
+//    }
 
-        return errors.values.all { it.isEmpty() }
-            .let { isValid ->
-                if (isValid) Either.Success(it)
-                else Either.Error(
-                    SignIn.Error(
-                        email = errors[ValidationType.EMAIL]!!,
-                        password = errors[ValidationType.PASSWORD]!!,
-                    )
-                )
-            }
-    }
-
-    private fun validateInput(it: SignUp.Input): Either<SignUp.Input, SignUp.Error> {
-        val errors = mapOf(
-            ValidationType.EMAIL.to(it.email),
-            ValidationType.PASSWORD.to(it.password),
-            ValidationType.FIRST_NAME.to(it.firstName),
-            ValidationType.LAST_NAME.to(it.lastName),
-        )
-            .map(::validateField).toMap()
-            .map(::mapFieldError).toMap()
-
-        return errors.values.all { it.isEmpty() }
-            .let { isValid ->
-                if (isValid) Either.Success(it)
-                else Either.Error(
-                    SignUp.Error(
-                        email = errors[ValidationType.EMAIL]!!,
-                        password = errors[ValidationType.PASSWORD]!!,
-                        firstName = errors[ValidationType.FIRST_NAME]!!,
-                        lastName = errors[ValidationType.LAST_NAME]!!,
-                    )
-                )
-            }
-    }
-
-    private fun validateField(it: Entry<ValidationType, String>) =
-        it.key.to(TextValidatorFactory.create(it.key).validate(it.value))
-
-    private fun mapFieldError(it: Entry<ValidationType, TextValidator.Result>) =
-        when (it.key) {
-            ValidationType.EMAIL -> it.key.to(mapEmailError(it.value))
-            ValidationType.PASSWORD -> it.key.to(mapPasswordError(it.value))
-            ValidationType.FIRST_NAME -> it.key.to(mapNameError(it.value))
-            ValidationType.LAST_NAME -> it.key.to(mapNameError(it.value))
-        }
-
-    private fun mapPasswordError(it: TextValidator.Result) =
+    private fun mapError(it: TextValidator.Error) =
         when (it) {
-            TextValidator.Result.TOO_SHORT -> "Senha muito curta"
-            TextValidator.Result.TOO_LONG -> "Senha muito longa"
-            TextValidator.Result.MUST_HAVE -> "A senha deve conter letras maiúsculas, minúsculas, números, e símbolos"
-            else -> ""
-        }
 
-    private fun mapEmailError(it: TextValidator.Result) =
-        when (it) {
-            TextValidator.Result.INVALID_FORMAT -> "Email inválido"
-            TextValidator.Result.TOO_SHORT -> "Email muito curto"
-            TextValidator.Result.TOO_LONG -> "Email muito longo"
-            else -> ""
-        }
-
-    private fun mapNameError(it: TextValidator.Result) =
-        when (it) {
-            TextValidator.Result.TOO_SHORT -> "Nome é obrigatório"
-            TextValidator.Result.TOO_LONG -> "Nome muito longo"
+            is EmailValidator.Error.InvalidFormat -> "Campo inválido"
+            is LengthValidator.Error.TooShort -> "Campo muito curto"
+            is LengthValidator.Error.TooLong -> "Campo muito longo"
+            is LowerCaseValidator.Error.AtLeast -> "O campo deve conter letras minúsculas"
+            is UpperCaseValidator.Error.AtLeast -> "O campo deve conter letras maiúsculas"
+            is NumbersValidator.Error.AtLeast -> "O campo deve conter números"
+            is SymbolsValidator.Error.AtLeast -> "O campo deve conter symbolos"
             else -> ""
         }
 }

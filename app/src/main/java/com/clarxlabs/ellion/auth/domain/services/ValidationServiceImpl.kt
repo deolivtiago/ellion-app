@@ -1,86 +1,57 @@
 package com.clarxlabs.ellion.auth.domain.services
 
 import com.clarxlabs.ellion.application.utilities.Either
-import com.clarxlabs.ellion.auth.domain.validation.TextValidator
-import com.clarxlabs.ellion.auth.domain.validation.TextValidatorComposite
-import com.clarxlabs.ellion.auth.domain.validation.validators.EmailValidator
-import com.clarxlabs.ellion.auth.domain.validation.validators.LengthValidator
+import com.clarxlabs.ellion.application.utilities.validation.EmailValidation
+import com.clarxlabs.ellion.application.utilities.validation.LengthValidation
+import com.clarxlabs.ellion.application.utilities.validation.LowerCaseValidation
+import com.clarxlabs.ellion.application.utilities.validation.NumbersValidation
+import com.clarxlabs.ellion.application.utilities.validation.SymbolsValidation
+import com.clarxlabs.ellion.application.utilities.validation.TextFieldValidation
+import com.clarxlabs.ellion.application.utilities.validation.TextFieldValidation.Strategy
+import com.clarxlabs.ellion.application.utilities.validation.TextValidation
+import com.clarxlabs.ellion.application.utilities.validation.UpperCaseValidation
+import com.clarxlabs.ellion.auth.domain.services.ValidationService.Validate
 import kotlin.collections.Map.Entry
 
-enum class ValidationType { EMAIL, PASSWORD, FIRST_NAME, LAST_NAME }
+class ValidationServiceImpl : ValidationService {
+    override fun validate(text: String, strategy: Strategy): Either<String, TextValidation.Error> =
+        TextFieldValidation(strategy).validate(text)
 
-object TextValidatorFactory {
-    fun create(type: ValidationType): TextValidator = type.let {
-        when (it) {
-            ValidationType.EMAIL ->
-                TextValidatorComposite(listOf(LengthValidator(), EmailValidator()))
-
-            ValidationType.PASSWORD ->
-                LengthValidator()
-
-            ValidationType.FIRST_NAME ->
-                LengthValidator(min = 1)
-
-            ValidationType.LAST_NAME ->
-                LengthValidator(min = 0)
-        }
-    }
-}
-
-class ValidationServiceImpl(
-    val validatorFactory: TextValidatorFactory
-) : ValidationService {
-    override suspend fun execute(input: ValidationService.Input): Either<ValidationService.Output, ValidationService.Error> {
-        val errors = mapOf(
-            ValidationType.EMAIL.to(input.email),
-            ValidationType.PASSWORD.to(input.password),
-        )
+    override fun validateFields(input: Validate.Input): Either<Validate.Output, Validate.Error> {
+        val errors = input.fields
             .map(::validateField).toMap()
             .map(::mapFieldError).toMap()
 
         return errors.values.all { it.isEmpty() }
             .let {
-                if (it) Either.Success(ValidationService.Output(input.email, input.email))
-                else Either.Error(
-                    ValidationService.Error(
-                        listOf(errors[ValidationType.EMAIL]!!),
-                        listOf(errors[ValidationType.PASSWORD]!!),
-                    )
-                )
+                if (it) Either.Success(Validate.Output(input.fields))
+                else Either.Failure(Validate.Error(errors))
             }
     }
 
-    private fun validateField(it: Entry<ValidationType, String>) =
-        it.key.to(validatorFactory.create(it.key).validate(it.value))
+    private fun validateField(it: Entry<Strategy, String>): Pair<Strategy, Either<String, TextValidation.Error>> =
+        it.key.to(it.key.validator.validate(it.value))
 
-    private fun mapFieldError(it: Entry<ValidationType, TextValidator.Result>) =
-        when (it.key) {
-            ValidationType.EMAIL -> it.key.to(mapEmailError(it.value))
-            ValidationType.PASSWORD -> it.key.to(mapPasswordError(it.value))
-            ValidationType.FIRST_NAME -> it.key.to(mapNameError(it.value))
-            ValidationType.LAST_NAME -> it.key.to(mapNameError(it.value))
+    private fun mapFieldError(it: Entry<Strategy, Either<String, TextValidation.Error>>): Pair<Strategy, String> =
+        it.key.to(errorMessage(it.value))
+
+    fun errorMessage(it: Either<String, TextValidation.Error>): String =
+        when (it) {
+            is Either.Success -> ""
+            is Either.Failure -> errorMessage(it.output)
         }
 
-    private fun mapPasswordError(it: TextValidator.Result) =
+    fun errorMessage(it: TextValidation.Error): String =
         when (it) {
-            TextValidator.Result.TOO_SHORT -> "Senha muito curta"
-            TextValidator.Result.TOO_LONG -> "Senha muito longa"
-            TextValidator.Result.MUST_HAVE -> "A senha deve conter letras maiúsculas, minúsculas, números, e símbolos"
-            else -> ""
-        }
+            is LengthValidation.Error.Required -> "é obrigatório"
+            is LengthValidation.Error.TooLong -> "deve conter menos de ${it.max} caracter(es)"
+            is LengthValidation.Error.TooShort -> "deve conter ao menos ${it.min} caracter(es)"
+            is EmailValidation.Error.InvalidFormat -> "deve ter um formato válido"
+            is NumbersValidation.Error.AtLeast -> "deve conter ao menos ${it.min} número(s)"
+            is LowerCaseValidation.Error.AtLeast -> "deve conter ao menos ${it.min} minúscula(s)"
+            is UpperCaseValidation.Error.AtLeast -> "deve conter ao menos ${it.min} maiúscula(s)"
+            is SymbolsValidation.Error.AtLeast -> "deve conter ao menos ${it.min} símbolo(s). Ex: ${it.permitted}"
 
-    private fun mapEmailError(it: TextValidator.Result) =
-        when (it) {
-            TextValidator.Result.INVALID_FORMAT -> "Email inválido"
-            TextValidator.Result.TOO_SHORT -> "Email muito curto"
-            TextValidator.Result.TOO_LONG -> "Email muito longo"
-            else -> ""
-        }
-
-    private fun mapNameError(it: TextValidator.Result) =
-        when (it) {
-            TextValidator.Result.TOO_SHORT -> "Nome é obrigatório"
-            TextValidator.Result.TOO_LONG -> "Nome muito longo"
-            else -> ""
+            is TextFieldValidation.Error -> "O campo ${it.strategy.label} ${errorMessage(it.error)}"
         }
 }

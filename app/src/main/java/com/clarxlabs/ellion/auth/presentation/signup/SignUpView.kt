@@ -105,7 +105,7 @@ fun SignUpViewContent(
                     QuestionButton(
                         questionText = "Precisa de ajuda?",
                         actionTitle = "Entrar em contato",
-                        onClicked = { onEvent(SignUpModel.Event.OnContactClicked) },
+                        onClicked = { onEvent(SignUpModel.Event.OnContactClicked(onNavigate)) },
                         modifier = Modifier.align(Alignment.End),
                     )
                 }
@@ -115,9 +115,7 @@ fun SignUpViewContent(
                         value = state.fullName,
                         onValueChange = { onEvent(SignUpModel.Event.OnFullNameChanged(it)) },
                         isError = state.fullNameError.isNotEmpty(),
-                        supportingText = if (state.fullNameError.isNotEmpty()) {
-                            { Text(text = state.fullNameError) }
-                        } else null,
+                        supportingText = { Text(text = state.fullNameError).takeUnless { state.fullNameError.isNotEmpty() } },
                         label = { Text("Nome Completo") },
                         shape = MaterialTheme.shapes.large,
                         enabled = !state.isLoading,
@@ -127,9 +125,8 @@ fun SignUpViewContent(
                                 contentDescription = "Full name icon"
                             )
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp),
+                        maxLines = 1,
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     CredentialsFormFields(
@@ -140,16 +137,17 @@ fun SignUpViewContent(
                         onPasswordChanged = { onEvent(SignUpModel.Event.OnPasswordChanged(it)) },
                         passwordErrorMessage = state.passwordError,
                         isPasswordVisible = state.isPasswordVisible,
-                        onPasswordVisibilityClicked = { onEvent(SignUpModel.Event.OnPasswordVisibilityClicked) },
+                        onPasswordVisibilityClicked = {
+                            onEvent(SignUpModel.Event.OnPasswordVisibilityClicked(onNavigate))
+                        },
                         isLoading = state.isLoading,
                     )
 
                     OutlinedTextField(
                         value = state.passwordConfirmation,
                         onValueChange = { onEvent(SignUpModel.Event.OnPasswordConfirmationChanged(it)) },
-                        supportingText = if (state.passwordConfirmationError.isNotEmpty()) {
-                            { Text(text = state.passwordConfirmationError) }
-                        } else null,
+                        isError = state.passwordConfirmationError.isNotEmpty(),
+                        supportingText = { Text(text = state.passwordConfirmationError).takeUnless { state.passwordConfirmationError.isNotEmpty() } },
                         label = { Text("Confirmação de Senha") },
                         shape = MaterialTheme.shapes.large,
                         enabled = !state.isLoading,
@@ -163,7 +161,13 @@ fun SignUpViewContent(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         trailingIcon = {
                             IconButton(
-                                onClick = { onEvent(SignUpModel.Event.OnPasswordVisibilityClicked) },
+                                onClick = {
+                                    onEvent(
+                                        SignUpModel.Event.OnPasswordVisibilityClicked(
+                                            onNavigate
+                                        )
+                                    )
+                                },
                                 enabled = !state.isLoading,
                             ) {
                                 Icon(
@@ -172,20 +176,20 @@ fun SignUpViewContent(
                                 )
                             }
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(2.dp),
+                        maxLines = 1,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    ActionButton(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        onClicked = { onEvent(SignUpModel.Event.OnSubmitClicked(onNavigate)) },
+                        isLoading = state.isLoading,
                     )
                 }
 
-                ActionButton(
-                    onClicked = { onEvent(SignUpModel.Event.OnSubmitClicked(onNavigate)) },
-                    isLoading = state.isLoading,
-                )
-
                 TermsAndPolicies(
-                    onTermsClicked = { onEvent(SignUpModel.Event.OnTermsClicked) },
-                    onPoliciesClicked = { onEvent(SignUpModel.Event.OnPoliciesClicked) },
+                    onTermsClicked = { onEvent(SignUpModel.Event.OnTermsClicked(onNavigate)) },
+                    onPoliciesClicked = { onEvent(SignUpModel.Event.OnPoliciesClicked(onNavigate)) },
                 )
 
                 QuestionButton(

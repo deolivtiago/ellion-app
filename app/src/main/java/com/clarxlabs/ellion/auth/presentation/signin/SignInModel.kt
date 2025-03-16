@@ -16,17 +16,17 @@ sealed interface SignInModel : AppModel {
         val isPasswordVisible: Boolean = false,
 
         val isLoading: Boolean = false,
-    ) : AppModel.State<SignInModel>
+    ) : AppModel.State
 
-    sealed interface Event : AppModel.Event<SignInModel> {
+    sealed interface Event : AppModel.Event {
         data class OnEmailChanged(val email: String) : Event
         data class OnPasswordChanged(val password: String) : Event
         data object OnPasswordVisibilityClicked : Event
         data class OnSubmitClicked(val navigateTo: (NavRoute) -> Unit) : Event
         data object OnResetPasswordClicked : Event
         data object OnContactClicked : Event
-        data object OnTermsClicked : Event
-        data object OnPoliciesClicked : Event
+        data class OnTermsClicked(val navigateTo: (NavRoute) -> Unit) : Event
+        data class OnPoliciesClicked(val navigateTo: (NavRoute) -> Unit) : Event
         data class OnSignUpClicked(val navigateTo: (NavRoute) -> Unit) : Event
     }
 }

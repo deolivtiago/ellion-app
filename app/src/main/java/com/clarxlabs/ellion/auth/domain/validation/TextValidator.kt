@@ -1,13 +1,9 @@
 package com.clarxlabs.ellion.auth.domain.validation
 
-interface TextValidator {
-    fun validate(text: String): Result
+import com.clarxlabs.ellion.application.utilities.Either
 
-    enum class Result {
-        INVALID_FORMAT,
-        TOO_SHORT,
-        TOO_LONG,
-        MUST_HAVE,
-        VALID,
-    }
+interface TextValidator {
+    fun validate(text: String): Either<String, Error>
+
+    interface Error
 }

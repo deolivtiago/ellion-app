@@ -1,14 +1,23 @@
 package com.clarxlabs.ellion.auth.domain.validation.validators
 
+import com.clarxlabs.ellion.application.utilities.Either
 import com.clarxlabs.ellion.auth.domain.validation.TextValidator
 
-class LengthValidator(val min: Int = 6, val max: Int = 160) : TextValidator {
-    override fun validate(value: String): TextValidator.Result {
-        
-        if (value.length < min) return TextValidator.Result.TOO_SHORT
+class LengthValidator(
+    val min: Int = 6, val max: Int = 160
+) : TextValidator {
 
-        if (value.length > max) return TextValidator.Result.TOO_LONG
+    override fun validate(text: String): Either<String, Error> {
 
-        return TextValidator.Result.VALID
+        if (text.length < min) return Either.Failure(Error.TooShort(min))
+
+        if (text.length > max) return Either.Failure(Error.TooLong(max))
+
+        return Either.Success(text)
+    }
+
+    interface Error : TextValidator.Error {
+        data class TooShort(val min: Int) : Error
+        data class TooLong(val max: Int) : Error
     }
 }
