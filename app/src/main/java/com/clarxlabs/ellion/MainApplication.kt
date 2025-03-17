@@ -8,8 +8,8 @@ import androidx.navigation.compose.rememberNavController
 import com.clarxlabs.ellion.application.config.NavRoute
 import com.clarxlabs.ellion.application.factories.HttpClientFactory
 import com.clarxlabs.ellion.application.theme.EllionTheme
-import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
-import com.clarxlabs.ellion.auth.data.remote.MainAuthDataSource
+import com.clarxlabs.ellion.auth.data.remote.AuthenticationDataSource
+import com.clarxlabs.ellion.auth.data.remote.AuthenticationDataSourceImpl
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationServiceImpl
 import com.clarxlabs.ellion.auth.domain.services.ValidationService
@@ -36,7 +36,7 @@ import org.koin.dsl.module
 
 val appModule = module {
     singleOf(HttpClientFactory::create).bind<HttpClient>()
-    singleOf(::MainAuthDataSource).bind<AuthDataSource>()
+    singleOf(::AuthenticationDataSourceImpl).bind<AuthenticationDataSource>()
     singleOf(::ValidationServiceImpl).bind<ValidationService>()
     singleOf(::AuthenticationServiceImpl).bind<AuthenticationService>()
 

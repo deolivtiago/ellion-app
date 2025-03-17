@@ -62,7 +62,7 @@ class TextFieldValidation(val strategy: Strategy) : TextValidation {
                 is UpperCaseValidation.Error.AtLeast -> "deve conter ao menos ${it.min} caracter(es) maiúsculo(s)"
                 is SymbolsValidation.Error.AtLeast -> "deve conter ao menos ${it.min} símbolo(s). Ex: ${it.permitted}"
 
-                is TextFieldValidation.Error -> "O campo ${it.strategy.label} ${errorMessageOf(it.error)}"
+                is Error -> "O campo ${it.strategy.label} ${errorMessageOf(it.error)}"
             }
     }
 }

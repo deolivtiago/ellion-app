@@ -4,14 +4,14 @@ import android.util.Patterns
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
-import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
-import com.clarxlabs.ellion.auth.data.remote.inputs.SignOutInput
+import com.clarxlabs.ellion.application.utilities.Either
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.SignOut
 import com.clarxlabs.ellion.auth.presentation.AppViewModel
-import io.ktor.client.statement.HttpResponse
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val authDataSource: AuthDataSource,
+    private val authenticationService: AuthenticationService,
     handle: SavedStateHandle,
 ) : AppViewModel<HomeModel.State, HomeModel.Event>(HomeModel.State(handle)) {
 
@@ -29,7 +29,7 @@ class HomeViewModel(
                 setState { it.copy(isLoading = true) }
 
                 signOut {
-                    if (it.status.value == 204) {
+                    if (it is Either.Success) {
                         setState { it.copy(accessToken = "", refreshToken = "") }
 
                         event.navigateTo(NavRoute.SignIn)
@@ -87,11 +87,10 @@ class HomeViewModel(
         return error.let { validationMessages.getOrDefault(it, "") }
     }
 
+    private fun signOut(onResponse: (Either<SignOut.Output, SignOut.Error>) -> Unit = {}) {
+        val input = SignOut.Input(state.value.accessToken, state.value.refreshToken)
 
-    private fun signOut(onResponse: (HttpResponse) -> Unit) {
-        val input = SignOutInput(state.value.accessToken, state.value.refreshToken)
-
-        viewModelScope.launch { onResponse(authDataSource.signOut(input)) }
+        viewModelScope.launch { onResponse(authenticationService.signOut(input)) }
     }
 }
 

@@ -126,6 +126,7 @@ fun SignInViewContent(
                         modifier = Modifier.padding(vertical = 8.dp),
                         onClicked = { onEvent(SignInModel.Event.OnSubmitClicked(onNavigate)) },
                         isLoading = state.isLoading,
+                        isEnabled = state.isFormValid,
                     )
                 }
 

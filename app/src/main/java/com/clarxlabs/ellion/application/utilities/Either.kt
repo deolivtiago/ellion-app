@@ -2,10 +2,10 @@ package com.clarxlabs.ellion.application.utilities
 
 import kotlinx.serialization.Serializable
 
-sealed interface Either<out S, out E> {
+sealed interface Either<out S, out F> {
     @Serializable
-    data class Success<out S, out E>(val output: S) : Either<S, E>
+    data class Success<out S, out F>(val output: S) : Either<S, F>
 
     @Serializable
-    data class Failure<out S, out E>(val output: E) : Either<S, E>
+    data class Failure<out S, out F>(val output: F) : Either<S, F>
 }

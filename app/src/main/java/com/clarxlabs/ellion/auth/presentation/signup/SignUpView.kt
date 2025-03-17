@@ -184,6 +184,7 @@ fun SignUpViewContent(
                         modifier = Modifier.padding(vertical = 8.dp),
                         onClicked = { onEvent(SignUpModel.Event.OnSubmitClicked(onNavigate)) },
                         isLoading = state.isLoading,
+                        isEnabled = state.isFormValid,
                     )
                 }
 

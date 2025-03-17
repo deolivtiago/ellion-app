@@ -18,17 +18,10 @@ sealed interface SignUpModel : AppModel {
         val passwordConfirmationError: String = "",
 
         val isPasswordVisible: Boolean = false,
+        val isFormValid: Boolean = false,
 
         val isLoading: Boolean = false,
-    ) : AppModel.State {
-        fun firstName(): String =
-            fullName.replace("  ", " ").substringBefore(" ").trim()
-                .replaceFirstChar { it.uppercase() }
-
-        fun lastName(): String =
-            fullName.replace("  ", " ").substringAfter(" ", "").trimStart().split(" ")
-                .joinToString(" ") { if (it.length > 2) it.replaceFirstChar { it.uppercase() } else it }
-    }
+    ) : AppModel.State
 
     sealed interface Event : AppModel.Event {
         data class OnEmailChanged(val text: String) : Event

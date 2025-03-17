@@ -3,15 +3,15 @@ package com.clarxlabs.ellion.auth.presentation.confirm
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.application.config.NavRoute
-import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
-import com.clarxlabs.ellion.auth.data.remote.inputs.ConfirmInput
-import com.clarxlabs.ellion.auth.data.remote.inputs.VerifyInput
+import com.clarxlabs.ellion.application.utilities.Either
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.Confirm
+import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.Verify
 import com.clarxlabs.ellion.auth.presentation.AppViewModel
-import io.ktor.client.statement.HttpResponse
 import kotlinx.coroutines.launch
 
 class ConfirmViewModel(
-    private val authDataSource: AuthDataSource,
+    private val authenticationService: AuthenticationService,
     handle: SavedStateHandle,
 ) : AppViewModel<ConfirmModel.State, ConfirmModel.Event>(ConfirmModel.State(handle)) {
 
@@ -33,7 +33,7 @@ class ConfirmViewModel(
                 setState { it.copy(isLoading = true) }
 
                 confirmEmailVerification {
-                    if (it.status.value == 200) event.navigateTo(NavRoute.SignIn)
+                    if (it is Either.Success) event.navigateTo(NavRoute.SignIn)
                 }
 
                 setState { it.copy(isLoading = false) }
@@ -45,15 +45,15 @@ class ConfirmViewModel(
         }
     }
 
-    private fun sendVerificationEmail(onResponse: (HttpResponse) -> Unit = {}) {
-        val input = VerifyInput(email = state.value.email)
+    private fun sendVerificationEmail(onResponse: (Either<Verify.Output, Verify.Error>) -> Unit = {}) {
+        val input = Verify.Input(email = state.value.email)
 
-        viewModelScope.launch { onResponse(authDataSource.verify(input)) }
+        viewModelScope.launch { onResponse(authenticationService.verify(input)) }
     }
 
-    private fun confirmEmailVerification(onResponse: (HttpResponse) -> Unit = {}) {
-        val input = ConfirmInput(email = state.value.email, code = state.value.code)
+    private fun confirmEmailVerification(onResponse: (Either<Confirm.Output, Confirm.Error>) -> Unit = {}) {
+        val input = Confirm.Input(email = state.value.email, code = state.value.code)
 
-        viewModelScope.launch { onResponse(authDataSource.confirm(input)) }
+        viewModelScope.launch { onResponse(authenticationService.confirm(input)) }
     }
 }

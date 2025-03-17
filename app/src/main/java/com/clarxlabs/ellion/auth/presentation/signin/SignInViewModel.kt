@@ -8,7 +8,6 @@ import com.clarxlabs.ellion.application.utilities.validation.TextFieldValidation
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.SignIn
 import com.clarxlabs.ellion.auth.domain.services.ValidationService
-import com.clarxlabs.ellion.auth.domain.services.ValidationService.Validate
 import com.clarxlabs.ellion.auth.presentation.AppViewModel
 import kotlinx.coroutines.launch
 
@@ -44,28 +43,30 @@ class SignInViewModel(
     private fun onSubmitClicked(navigateTo: (NavRoute) -> Unit) {
         setState { it.copy(isLoading = true) }
 
-        signIn { result ->
-            when (result) {
-                is Either.Success -> navigateTo(
-                    NavRoute.Home(
-                        accessToken = result.output.accessToken,
-                        refreshToken = result.output.refreshToken,
+        if (isFormValid())
+            signIn { result ->
+                when (result) {
+                    is Either.Success -> navigateTo(
+                        NavRoute.Home(
+                            accessToken = result.output.accessToken,
+                            refreshToken = result.output.refreshToken,
+                        )
                     )
-                )
 
-                is Either.Failure -> {
-                    if (result.output.email == "must be verified")
-                        navigateTo(NavRoute.Verify(state.value.email))
-                    else
-                        setState {
-                            it.copy(
-                                emailError = result.output.email,
-                                passwordError = result.output.password
-                            )
-                        }
+                    is Either.Failure -> {
+                        if (result.output.email == "must be verified")
+                            navigateTo(NavRoute.Verify(state.value.email))
+                        else
+                            setState {
+                                it.copy(
+                                    emailError = result.output.email,
+                                    passwordError = result.output.password,
+                                )
+                            }
+                    }
                 }
             }
-        }
+
 
         setState { it.copy(isLoading = false) }
     }
@@ -97,6 +98,8 @@ class SignInViewModel(
                     .let { errorMessageOf(it) },
             )
         }
+
+        setState { it.copy(isFormValid = isFormValid()) }
     }
 
     private fun onEmailChanged(text: String) {
@@ -108,6 +111,8 @@ class SignInViewModel(
                     .let { errorMessageOf(it) },
             )
         }
+
+        setState { it.copy(isFormValid = isFormValid()) }
     }
 
     private fun signIn(onResponse: (Either<SignIn.Output, SignIn.Error>) -> Unit) {
@@ -119,14 +124,11 @@ class SignInViewModel(
         viewModelScope.launch { onResponse(authenticationService.signIn(input)) }
     }
 
-    private fun validateFields(onResult: (Either<Validate.Output, Validate.Error>) -> Unit) {
-        val input = Validate.Input(
+    private fun isFormValid(): Boolean =
+        validationService.isValid(
             mapOf(
                 Strategy.EMAIL.to(state.value.email),
                 Strategy.PASSWORD.to(state.value.password),
             )
         )
-
-        viewModelScope.launch { onResult(validationService.validateFields(input)) }
-    }
 }

@@ -1,173 +1,117 @@
 package com.clarxlabs.ellion.auth.domain.services
 
 import com.clarxlabs.ellion.application.utilities.Either
-import com.clarxlabs.ellion.application.utilities.Result
-import com.clarxlabs.ellion.auth.data.remote.AuthDataSource
-import com.clarxlabs.ellion.auth.data.remote.dtos.CredentialsData
-import com.clarxlabs.ellion.auth.data.remote.dtos.UserData
+import com.clarxlabs.ellion.auth.data.remote.AuthenticationDataSource
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.Confirm
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.SignIn
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.SignOut
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.SignUp
 import com.clarxlabs.ellion.auth.domain.services.AuthenticationService.Verify
-import com.clarxlabs.ellion.auth.domain.validation.TextValidator
-import com.clarxlabs.ellion.auth.domain.validation.validators.EmailValidator
-import com.clarxlabs.ellion.auth.domain.validation.validators.LengthValidator
-import com.clarxlabs.ellion.auth.domain.validation.validators.LowerCaseValidator
-import com.clarxlabs.ellion.auth.domain.validation.validators.NumbersValidator
-import com.clarxlabs.ellion.auth.domain.validation.validators.SymbolsValidator
-import com.clarxlabs.ellion.auth.domain.validation.validators.UpperCaseValidator
 
 class AuthenticationServiceImpl(
-    private val authDataSource: AuthDataSource,
+    private val authenticationDataSource: AuthenticationDataSource,
 ) : AuthenticationService {
-    override suspend fun signIn(input: SignIn.Input): Either<SignIn.Output, SignIn.Error> {
-//        return validateInput(input).let {
-//            when (it) {
-//                is Either.Failure -> Either.Failure(it.output)
-//                is Either.Success -> doSignIn(it.output)
-//            }
-//        }
 
-        return doSignIn(input)
-    }
-
-    override suspend fun signUp(input: SignUp.Input): Either<SignUp.Output, SignUp.Error> {
-//        return validateInput(input).let {
-//            when (it) {
-//                is Either.Failure -> Either.Failure(it.output)
-//                is Either.Success -> doSignUp(it.output)
-//            }
-//        }
-        return doSignUp(input)
-    }
-
-    override suspend fun signOut(input: SignOut.Input): Either<SignOut.Output, SignOut.Error> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun verify(input: Verify.Input): Either<Verify.Output, Verify.Error> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun confirm(input: Confirm.Input): Either<Confirm.Output, Confirm.Error> {
-        TODO("Not yet implemented")
-    }
-
-    private suspend fun doSignIn(it: SignIn.Input): Either<SignIn.Output, SignIn.Error> {
-        val input = CredentialsData(
+    override suspend fun signIn(it: SignIn.Input): Either<SignIn.Output, SignIn.Error> {
+        val input = AuthenticationDataSource.SignIn.Input(
             email = it.email,
             password = it.password,
         )
 
-        authDataSource.signIn(input).let {
-            return when (it) {
-                is Result.Data -> Either.Success(
+        return authenticationDataSource.signIn(input).let {
+            when (it) {
+                is Either.Success -> Either.Success(
                     SignIn.Output(
-                        accessToken = it.data.accessToken,
-                        refreshToken = it.data.refreshToken,
+                        it.output.accessToken,
+                        it.output.refreshToken
                     )
                 )
 
-                is Result.Error -> Either.Failure(
+                is Either.Failure -> Either.Failure(
                     SignIn.Error(
-                        email = it.error.email.first(),
-                        password = it.error.password.first(),
+                        it.output.email,
+                        it.output.password
                     )
                 )
             }
         }
     }
 
-    private suspend fun doSignUp(it: SignUp.Input): Either<SignUp.Output, SignUp.Error> {
-        val input = UserData(
+    override suspend fun signUp(it: SignUp.Input): Either<SignUp.Output, SignUp.Error> {
+        val input = AuthenticationDataSource.SignUp.Input(
             email = it.email,
             password = it.password,
             firstName = it.firstName,
             lastName = it.lastName,
-            role = it.role
         )
 
-        authDataSource.signUp(input).let {
-            return when (it) {
-                is Result.Data -> Either.Success(
+        return authenticationDataSource.signUp(input).let {
+            when (it) {
+                is Either.Success -> Either.Success(
                     SignUp.Output(
-                        id = it.data.id,
-                        email = it.data.email,
-                        firstName = it.data.firstName,
-                        lastName = it.data.lastName,
+                        id = it.output.id,
+                        email = it.output.email,
+                        firstName = it.output.firstName,
+                        lastName = it.output.lastName,
                     )
                 )
 
-                is Result.Error -> Either.Failure(
+                is Either.Failure -> Either.Failure(
                     SignUp.Error(
-                        email = it.error.email.first(),
-                        password = it.error.password.first(),
-                        firstName = it.error.firstName.first(),
-                        lastName = it.error.lastName.first(),
-                        role = it.error.role.first(),
+                        email = it.output.email,
+                        password = it.output.password,
+                        firstName = it.output.firstName,
+                        lastName = it.output.lastName,
                     )
                 )
             }
         }
     }
 
-//    private fun validateInput(it: SignIn.Input): Either<SignIn.Input, SignIn.Failure> {
-//        val errors = mapOf(
-//            ValidationType.EMAIL.to(it.email),
-//            ValidationType.PASSWORD.to(it.password)
-//        )
-//            .map(::validateField).toMap()
-//            .map(::mapFieldError).toMap()
-//
-//        return errors.values.all { it.isEmpty() }
-//            .let { isValid ->
-//                if (isValid) Either.Success(it)
-//                else Either.Failure(
-//                    SignIn.Failure(
-//                        email = errors[ValidationType.EMAIL]!!,
-//                        password = errors[ValidationType.PASSWORD]!!,
-//                    )
-//                )
-//            }
-//    }
-//
-//    private fun validateInput(it: SignUp.Input): Either<SignUp.Input, SignUp.Failure> {
-//        val errors = mapOf(
-//            ValidationType.EMAIL.to(it.email),
-//            ValidationType.PASSWORD.to(it.password),
-//            ValidationType.FIRST_NAME.to(it.firstName),
-//            ValidationType.LAST_NAME.to(it.lastName),
-//        )
-//            .map(::validateField).toMap<ValidationType, String>()
-//            .map(::mapFieldError).toMap()
-//
-//        return
-////        errors.values.all { it.isEmpty() }
-////            .let { isValid ->
-////                if (isValid) Either.Success(it)
-////                else
-//                    Either.Failure(
-//                    SignUp.Failure(
-//                        email = errors[ValidationType.EMAIL]!!,
-//                        password = errors[ValidationType.PASSWORD]!!,
-//                        firstName = errors[ValidationType.FIRST_NAME]!!,
-//                        lastName = errors[ValidationType.LAST_NAME]!!,
-//                    )
-//                )
-////            }
-//    }
 
-    private fun mapError(it: TextValidator.Error) =
-        when (it) {
+    override suspend fun signOut(it: SignOut.Input): Either<SignOut.Output, SignOut.Error> {
+        val input = AuthenticationDataSource.SignOut.Input(
+            accessToken = it.accessToken,
+            refreshToken = it.refreshToken,
+        )
 
-            is EmailValidator.Error.InvalidFormat -> "Campo inválido"
-            is LengthValidator.Error.TooShort -> "Campo muito curto"
-            is LengthValidator.Error.TooLong -> "Campo muito longo"
-            is LowerCaseValidator.Error.AtLeast -> "O campo deve conter letras minúsculas"
-            is UpperCaseValidator.Error.AtLeast -> "O campo deve conter letras maiúsculas"
-            is NumbersValidator.Error.AtLeast -> "O campo deve conter números"
-            is SymbolsValidator.Error.AtLeast -> "O campo deve conter symbolos"
-            else -> ""
+        return authenticationDataSource.signOut(input).let {
+            when (it) {
+                is Either.Success -> Either.Success(SignOut.Output)
+                is Either.Failure -> Either.Failure(
+                    SignOut.Error(
+                        accessToken = it.output.accessToken,
+                        refreshToken = it.output.refreshToken,
+                    )
+                )
+            }
         }
+    }
+
+    override suspend fun verify(it: Verify.Input): Either<Verify.Output, Verify.Error> {
+        val input = AuthenticationDataSource.Verify.Input(email = it.email)
+
+        return authenticationDataSource.verify(input).let {
+            when (it) {
+                is Either.Success -> Either.Success(Verify.Output)
+                is Either.Failure -> Either.Failure(Verify.Error(email = it.output.email))
+            }
+        }
+    }
+
+    override suspend fun confirm(it: Confirm.Input): Either<Confirm.Output, Confirm.Error> {
+        val input = AuthenticationDataSource.Confirm.Input(
+            email = it.email,
+            code = it.code,
+        )
+
+        return authenticationDataSource.confirm(input).let {
+            when (it) {
+                is Either.Success -> Either.Success(Confirm.Output)
+                is Either.Failure -> Either.Failure(
+                    Confirm.Error(email = it.output.email, code = it.output.code)
+                )
+            }
+        }
+    }
 }

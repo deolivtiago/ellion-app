@@ -14,6 +14,7 @@ sealed interface SignInModel : AppModel {
         val passwordError: String = "",
 
         val isPasswordVisible: Boolean = false,
+        val isFormValid: Boolean = false,
 
         val isLoading: Boolean = false,
     ) : AppModel.State
