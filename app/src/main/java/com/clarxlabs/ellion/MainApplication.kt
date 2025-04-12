@@ -5,27 +5,29 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.clarxlabs.ellion.application.config.NavRoute
-import com.clarxlabs.ellion.application.factories.HttpClientFactory
-import com.clarxlabs.ellion.application.theme.EllionTheme
-import com.clarxlabs.ellion.auth.data.remote.AuthenticationDataSource
-import com.clarxlabs.ellion.auth.data.remote.AuthenticationDataSourceImpl
-import com.clarxlabs.ellion.auth.domain.services.AuthenticationService
-import com.clarxlabs.ellion.auth.domain.services.AuthenticationServiceImpl
-import com.clarxlabs.ellion.auth.domain.services.ValidationService
-import com.clarxlabs.ellion.auth.domain.services.ValidationServiceImpl
-import com.clarxlabs.ellion.auth.presentation.confirm.ConfirmView
-import com.clarxlabs.ellion.auth.presentation.confirm.ConfirmViewModel
-import com.clarxlabs.ellion.auth.presentation.home.HomeView
-import com.clarxlabs.ellion.auth.presentation.home.HomeViewModel
-import com.clarxlabs.ellion.auth.presentation.signin.SignInView
-import com.clarxlabs.ellion.auth.presentation.signin.SignInViewModel
-import com.clarxlabs.ellion.auth.presentation.signup.SignUpView
-import com.clarxlabs.ellion.auth.presentation.signup.SignUpViewModel
-import com.clarxlabs.ellion.auth.presentation.verify.VerifyView
-import com.clarxlabs.ellion.auth.presentation.verify.VerifyViewModel
-import com.clarxlabs.ellion.users.presentation.list.ListView
-import com.clarxlabs.ellion.users.presentation.list.ListViewModel
+import com.clarxlabs.ellion.core.datasources.AuthenticationDataSource
+import com.clarxlabs.ellion.core.datasources.AuthenticationDataSourceImpl
+import com.clarxlabs.ellion.core.datasources.factories.HttpClientFactory
+import com.clarxlabs.ellion.core.repositories.AuthenticationRepository
+import com.clarxlabs.ellion.core.repositories.AuthenticationRepositoryImpl
+import com.clarxlabs.ellion.core.services.ValidationService
+import com.clarxlabs.ellion.core.services.ValidationServiceImpl
+import com.clarxlabs.ellion.ui.AppRoute
+import com.clarxlabs.ellion.ui.auth.confirm.ConfirmView
+import com.clarxlabs.ellion.ui.auth.confirm.ConfirmViewModel
+import com.clarxlabs.ellion.ui.auth.profile.ProfileView
+import com.clarxlabs.ellion.ui.auth.profile.ProfileViewModel
+import com.clarxlabs.ellion.ui.auth.signin.SignInView
+import com.clarxlabs.ellion.ui.auth.signin.SignInViewModel
+import com.clarxlabs.ellion.ui.auth.signup.SignUpView
+import com.clarxlabs.ellion.ui.auth.signup.SignUpViewModel
+import com.clarxlabs.ellion.ui.auth.verify.VerifyView
+import com.clarxlabs.ellion.ui.auth.verify.VerifyViewModel
+import com.clarxlabs.ellion.ui.home.HomeView
+import com.clarxlabs.ellion.ui.home.HomeViewModel
+import com.clarxlabs.ellion.ui.theme.EllionTheme
+import com.clarxlabs.ellion.ui.users.list.ListView
+import com.clarxlabs.ellion.ui.users.list.ListViewModel
 import io.ktor.client.HttpClient
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.KoinApplication
@@ -34,61 +36,69 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-val appModule = module {
-    singleOf(HttpClientFactory::create).bind<HttpClient>()
-    singleOf(::AuthenticationDataSourceImpl).bind<AuthenticationDataSource>()
-    singleOf(::ValidationServiceImpl).bind<ValidationService>()
-    singleOf(::AuthenticationServiceImpl).bind<AuthenticationService>()
-
-    viewModelOf(::SignInViewModel)
-    viewModelOf(::SignUpViewModel)
-    viewModelOf(::VerifyViewModel)
-    viewModelOf(::ConfirmViewModel)
-    viewModelOf(::HomeViewModel)
-    viewModelOf(::ListViewModel)
-}
 
 @Composable
 fun MainApplication() {
+    val appModule = module {
+        singleOf(HttpClientFactory::create).bind<HttpClient>()
+        singleOf(::AuthenticationDataSourceImpl).bind<AuthenticationDataSource>()
+        singleOf(::AuthenticationRepositoryImpl).bind<AuthenticationRepository>()
+        singleOf(::ValidationServiceImpl).bind<ValidationService>()
+
+        viewModelOf(::SignInViewModel)
+        viewModelOf(::SignUpViewModel)
+        viewModelOf(::VerifyViewModel)
+        viewModelOf(::ConfirmViewModel)
+        viewModelOf(::HomeViewModel)
+        viewModelOf(::ProfileViewModel)
+        viewModelOf(::ListViewModel)
+    }
+
     KoinApplication({ modules(appModule) }) {
         EllionTheme {
             val navController = rememberNavController()
-            NavHost(navController, NavRoute.AuthGraph) {
-                navigation<NavRoute.AuthGraph>(startDestination = NavRoute.SignIn) {
-                    composable<NavRoute.SignIn> {
+            NavHost(navController, AppRoute.AuthGraph) {
+                navigation<AppRoute.AuthGraph>(startDestination = AppRoute.SignIn) {
+                    composable<AppRoute.SignIn> {
                         SignInView(
                             viewModel = koinViewModel(),
-                            onNavigate = navController::navigate,
+                            navigateTo = navController::navigate,
                         )
                     }
-                    composable<NavRoute.SignUp> {
+                    composable<AppRoute.SignUp> {
                         SignUpView(
                             viewModel = koinViewModel(),
-                            onNavigate = navController::navigate,
+                            navigateTo = navController::navigate,
                         )
                     }
-                    composable<NavRoute.Verify> {
+                    composable<AppRoute.Verify> {
                         VerifyView(
                             viewModel = koinViewModel(),
                             onNavigate = navController::navigate,
                         )
                     }
-                    composable<NavRoute.Confirm> {
+                    composable<AppRoute.Confirm> {
                         ConfirmView(
                             viewModel = koinViewModel(),
                             onNavigate = navController::navigate,
                         )
                     }
-                    composable<NavRoute.Home> {
+                    composable<AppRoute.Home> {
                         HomeView(
+                            viewModel = koinViewModel(),
+                            navigateTo = navController::navigate,
+                        )
+                    }
+                    composable<AppRoute.ListUsers> {
+                        ListView(
                             viewModel = koinViewModel(),
                             onNavigate = navController::navigate,
                         )
                     }
-                    composable<NavRoute.ListUsers> {
-                        ListView(
+                    composable<AppRoute.Profile> {
+                        ProfileView(
                             viewModel = koinViewModel(),
-                            onNavigate = navController::navigate,
+                            navigateTo = navController::navigate,
                         )
                     }
                 }
@@ -96,4 +106,3 @@ fun MainApplication() {
         }
     }
 }
-
