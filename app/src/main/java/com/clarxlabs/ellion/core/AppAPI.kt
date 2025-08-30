@@ -1,13 +1,13 @@
 package com.clarxlabs.ellion.core
 
 object AppAPI {
-    const val BASE_URL: String = "ellion.gigalixirapp.com"
+    const val BASE_URL: String = "lillia.gigalixirapp.com"
 
-    const val SIGNIN: String = "/api/auth/signin"
-    const val SIGNUP: String = "/api/auth/signup"
-    const val SIGNOUT: String = "/api/auth/signout"
-    const val VERIFY: String = "/api/auth/verify"
-    const val CONFIRM: String = "/api/auth/confirm"
-    const val USERINFO: String = "/api/auth/me"
+    const val SIGNIN: String = "/api/auth/sign-in"
+    const val SIGNUP: String = "/api/auth/sign-up"
+    const val SIGNOUT: String = "/api/auth/sign-out"
+    const val VERIFY: String = "/api/auth/send-code"
+    const val CONFIRM: String = "/api/auth/confirm-account"
+    const val USERINFO: String = "/api/auth/user-info"
     const val LIST_USERS: String = "/api/users"
 }

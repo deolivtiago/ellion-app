@@ -1,6 +1,7 @@
 package com.clarxlabs.ellion.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Icon
@@ -19,9 +20,11 @@ fun TextFormField(
     value: String = "",
     valueErrorMessage: String = "",
     onValueChanged: (String) -> Unit = {},
-    label: String="Email",
+    label: String = "Email",
     isEnabled: Boolean = true,
     isLoading: Boolean = false,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     leadingIcon: @Composable (() -> Unit) = {
         Icon(
             imageVector = Icons.Default.Email,
@@ -37,8 +40,10 @@ fun TextFormField(
         label = { Text(label) },
         shape = MaterialTheme.shapes.large,
         enabled = !isLoading and isEnabled,
+        trailingIcon = trailingIcon,
         leadingIcon = leadingIcon,
         maxLines = 1,
+        keyboardOptions = keyboardOptions,
         modifier = modifier.fillMaxWidth(),
     )
 }

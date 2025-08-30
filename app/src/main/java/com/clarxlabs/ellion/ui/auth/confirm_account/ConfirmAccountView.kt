@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.verify
+package com.clarxlabs.ellion.ui.auth.confirm_account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +13,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Password
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,21 +40,22 @@ import com.clarxlabs.ellion.ui.AppRoute
 import com.clarxlabs.ellion.ui.components.ActionButton
 import com.clarxlabs.ellion.ui.components.FormHeader
 import com.clarxlabs.ellion.ui.components.QuestionButton
+import com.clarxlabs.ellion.ui.components.TextFormField
 import com.clarxlabs.ellion.ui.theme.EllionTheme
 
 @Composable
-fun VerifyView(viewModel: VerifyViewModel, onNavigate: (AppRoute) -> Unit) {
+fun ConfirmAccountView(viewModel: ConfirmAccountViewModel, navigateTo: (AppRoute) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val onEvent = viewModel::sendEvent
+    val sendEvent = viewModel::sendEvent
 
-    VerifyViewContent(state, onEvent, onNavigate)
+    ConfirmAccountViewContent(state, sendEvent, navigateTo)
 }
 
 @Composable
-fun VerifyViewContent(
-    state: VerifyModel.State,
-    onEvent: (VerifyModel.Event) -> Unit,
-    onNavigate: (AppRoute) -> Unit,
+fun ConfirmAccountViewContent(
+    state: ConfirmAccountModel.State,
+    sendEvent: (ConfirmAccountModel.Event) -> Unit,
+    navigateTo: (AppRoute) -> Unit,
 ) {
     Surface(
         modifier = Modifier
@@ -93,12 +99,14 @@ fun VerifyViewContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(vertical = 4.dp)
                 ) {
-                    FormHeader(title = "Verificar Email")
+                    FormHeader(title = "Confirmar Cadastro")
 
                     QuestionButton(
                         questionText = "Precisa de ajuda?",
                         actionTitle = "Entrar em contato",
-                        onClicked = { onEvent(VerifyModel.Event.OnContactClicked(onNavigate)) },
+                        onClicked = {
+                            sendEvent(ConfirmAccountModel.Event.OnContactClicked(navigateTo))
+                        },
                         modifier = Modifier.align(Alignment.End),
                     )
                 }
@@ -112,7 +120,7 @@ fun VerifyViewContent(
                                 fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
                                 color = MaterialTheme.typography.bodyLarge.color,
                             )
-                        ) { append("Antes de acessar seu cadastro\nprecisamos verificar o email\n") }
+                        ) { append("Por favor, acesse o email\n") }
                         withStyle(
                             SpanStyle(
                                 fontSize = MaterialTheme.typography.bodyLarge.fontSize,
@@ -127,20 +135,52 @@ fun VerifyViewContent(
                                 fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
                                 color = MaterialTheme.typography.bodyLarge.color,
                             )
-                        ) { append("\nAo continuar, você receberá um email\ncom o código para confirmação\ndo seu cadastro.") }
+                        ) { append("\ne informe abaixo o código de verificação\nrecebido para confirmar seu cadastro.") }
+                    }
+                )
+
+                TextFormField(
+                    value = state.code,
+                    onValueChanged = {
+                        sendEvent(ConfirmAccountModel.Event.OnCodeChanged(it))
+                    },
+                    label = "Código de Verificação",
+                    isEnabled = !state.isLoading,
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                sendEvent(ConfirmAccountModel.Event.OnCodeChanged(""))
+                            },
+                            enabled = !state.isLoading,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Cancel,
+                                contentDescription = "Code text reset",
+                            )
+                        }
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Password,
+                            contentDescription = "Verification code icon"
+                        )
                     }
                 )
 
                 ActionButton(
-                    onClicked = { onEvent(VerifyModel.Event.OnSubmitClicked(onNavigate)) },
+                    onClicked = {
+                        sendEvent(ConfirmAccountModel.Event.OnSubmitClicked(navigateTo))
+                    },
                     isLoading = state.isLoading,
-                    actionTitle = "CONTINUAR"
+                    actionTitle = "CONFIRMAR",
                 )
 
                 QuestionButton(
-                    questionText = "Já possui um código?",
-                    actionTitle = "CONFIRMAR",
-                    onClicked = { onEvent(VerifyModel.Event.OnConfirmClicked(onNavigate)) },
+                    questionText = "Precisa de um novo código?",
+                    actionTitle = "REENVIAR",
+                    onClicked = {
+                        sendEvent(ConfirmAccountModel.Event.OnSendCodeClicked(navigateTo))
+                    },
                     isEnabled = !state.isLoading,
                 )
             }
@@ -156,12 +196,12 @@ fun VerifyViewContent(
 
 @Preview(device = "spec:parent=small_phone,navigation=buttons", showSystemUi = true)
 @Composable
-private fun VerifyViewContentPreview() {
+private fun ConfirmViewContentPreview() {
     EllionTheme {
-        VerifyViewContent(
-            state = VerifyModel.State(),
-            onEvent = {},
-            onNavigate = {},
+        ConfirmAccountViewContent(
+            state = ConfirmAccountModel.State(),
+            sendEvent = {},
+            navigateTo = {},
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.signup
+package com.clarxlabs.ellion.ui.auth.sign_up
 
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.core.repositories.AuthenticationRepository
@@ -118,7 +118,7 @@ class SignUpViewModel(
                             )
                         }
                     },
-                    { navigateTo(AppRoute.Verify(state.value.email)) },
+                    { navigateTo(AppRoute.VerifyAccount(state.value.email)) },
                 )
 
             }

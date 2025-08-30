@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.confirm
+package com.clarxlabs.ellion.ui.auth.confirm_account
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -14,22 +14,26 @@ import com.clarxlabs.ellion.ui.AppViewModel
 import it.czerwinski.kotlin.util.Either
 import kotlinx.coroutines.launch
 
-class ConfirmViewModel(
+class ConfirmAccountViewModel(
     private val authenticationRepository: AuthenticationRepository,
     handle: SavedStateHandle,
-) : AppViewModel<ConfirmModel.State, ConfirmModel.Event>(ConfirmModel.State(handle)) {
+) : AppViewModel<ConfirmAccountModel.State, ConfirmAccountModel.Event>(
+    ConfirmAccountModel.State(
+        handle
+    )
+) {
 
-    override fun sendEvent(event: ConfirmModel.Event) {
+    override fun sendEvent(event: ConfirmAccountModel.Event) {
         when (event) {
-            is ConfirmModel.Event.OnCodeChanged -> onCodeChanged(event.code.trim())
-            is ConfirmModel.Event.OnSubmitClicked -> onSubmitClicked(event.navigateTo)
-            is ConfirmModel.Event.OnSendCodeClicked -> onSendCodeClicked()
-            is ConfirmModel.Event.OnContactClicked -> onContactClicked(event.navigateTo)
+            is ConfirmAccountModel.Event.OnCodeChanged -> onCodeChanged(event.code.trim())
+            is ConfirmAccountModel.Event.OnSubmitClicked -> onSubmitClicked(event.navigateTo)
+            is ConfirmAccountModel.Event.OnSendCodeClicked -> onSendCodeClicked()
+            is ConfirmAccountModel.Event.OnContactClicked -> onContactClicked(event.navigateTo)
         }
     }
 
     private fun onCodeChanged(text: String) {
-        setState { it.copy(code = text, codeError = "") }
+        setState { it.copy(code = text.take(6), codeError = "") }
     }
 
     private fun onSendCodeClicked() {

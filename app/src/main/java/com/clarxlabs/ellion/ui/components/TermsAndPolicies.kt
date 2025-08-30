@@ -13,9 +13,16 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -24,9 +31,9 @@ import com.clarxlabs.ellion.ui.theme.EllionTheme
 
 @Composable
 fun TermsAndPolicies(
-    onTermsClicked: () -> Unit = {},
-    onPoliciesClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
+    termsUrl: String = "https://developer.android.com/",
+    policiesUrl: String = "https://developer.android.com/jetpack/compose",
     verticalArrangement: Arrangement.Vertical = Arrangement.Center,
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
 ) {
@@ -36,51 +43,50 @@ fun TermsAndPolicies(
         horizontalAlignment = horizontalAlignment,
     ) {
         Text(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = "Ao continuar, você está aceitando nossos",
-            style = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
-            letterSpacing = TextUnit(-0.3F, TextUnitType.Sp),
+            textAlign = TextAlign.Center,
+            text = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                        fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                        color = MaterialTheme.typography.bodyLarge.color,
+                    )
+                ) { append("Ao continuar, você está aceitando nossos\n") }
+                withLink(
+                    LinkAnnotation.Url(
+                        termsUrl,
+                        TextLinkStyles(
+                            style = SpanStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary,
+                                textDecoration = TextDecoration.Underline,
+                            ),
+                        )
+                    )
+                ) { append("Termos de Uso") }
+                withStyle(
+                    style = SpanStyle(
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                        fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                        color = MaterialTheme.typography.bodyLarge.color,
+                    )
+                ) { append(" e ") }
+                withLink(
+                    LinkAnnotation.Url(
+                        policiesUrl,
+                        TextLinkStyles(
+                            style = SpanStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary,
+                                textDecoration = TextDecoration.Underline,
+                            ),
+                        )
+                    )
+                ) { append("Política de Privacidade") }
+            }
         )
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            TextButton(
-                modifier = Modifier.height(22.dp),
-                onClick = onTermsClicked,
-                contentPadding = PaddingValues(vertical = 0.dp, horizontal = 4.dp),
-                shape = MaterialTheme.shapes.small,
-            ) {
-                Text(
-                    text = "Termos de Uso",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                    ),
-                    letterSpacing = TextUnit(-0.3F, TextUnitType.Sp),
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                )
-            }
-            Text(text = "e", style = MaterialTheme.typography.bodyLarge)
-            TextButton(
-                modifier = Modifier.height(22.dp),
-                onClick = onPoliciesClicked,
-                contentPadding = PaddingValues(vertical = 0.dp, horizontal = 4.dp),
-                shape = MaterialTheme.shapes.small,
-            ) {
-                Text(
-                    text = "Política de Privacidade",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                    ),
-                    letterSpacing = TextUnit(-0.3F, TextUnitType.Sp),
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                )
-            }
-        }
     }
 }
 

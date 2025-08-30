@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.signin
+package com.clarxlabs.ellion.ui.auth.sign_in
 
 import com.clarxlabs.ellion.ui.AppModel
 import com.clarxlabs.ellion.ui.AppRoute
@@ -24,7 +24,7 @@ sealed interface SignInModel : AppModel {
         data class OnPasswordChanged(val password: String) : Event
         data object OnPasswordVisibilityClicked : Event
         data class OnSubmitClicked(val navigateTo: (AppRoute) -> Unit) : Event
-        data object OnResetPasswordClicked : Event
+        data class OnResetPasswordClicked(val navigateTo: (AppRoute) -> Unit) : Event
         data object OnContactClicked : Event
         data class OnTermsClicked(val navigateTo: (AppRoute) -> Unit) : Event
         data class OnPoliciesClicked(val navigateTo: (AppRoute) -> Unit) : Event

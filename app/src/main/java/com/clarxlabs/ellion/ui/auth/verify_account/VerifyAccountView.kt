@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.signup
+package com.clarxlabs.ellion.ui.auth.verify_account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,40 +13,42 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.clarxlabs.ellion.ui.AppRoute
 import com.clarxlabs.ellion.ui.components.ActionButton
 import com.clarxlabs.ellion.ui.components.FormHeader
-import com.clarxlabs.ellion.ui.components.PasswordFormField
 import com.clarxlabs.ellion.ui.components.QuestionButton
-import com.clarxlabs.ellion.ui.components.TermsAndPolicies
-import com.clarxlabs.ellion.ui.components.TextFormField
 import com.clarxlabs.ellion.ui.theme.EllionTheme
 
 @Composable
-fun SignUpView(viewModel: SignUpViewModel, navigateTo: (AppRoute) -> Unit) {
+fun VerifyAccountView(viewModel: VerifyAccountViewModel, navigateTo: (AppRoute) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val sendEvent = viewModel::sendEvent
 
-    SignUpViewContent(state, sendEvent, navigateTo)
+    VerifyAccountViewContent(state, sendEvent, navigateTo)
 }
 
 @Composable
-fun SignUpViewContent(
-    state: SignUpModel.State,
-    sendEvent: (SignUpModel.Event) -> Unit,
+fun VerifyAccountViewContent(
+    state: VerifyAccountModel.State,
+    sendEvent: (VerifyAccountModel.Event) -> Unit,
     navigateTo: (AppRoute) -> Unit,
 ) {
     Surface(
@@ -91,95 +93,59 @@ fun SignUpViewContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(vertical = 4.dp)
                 ) {
-                    FormHeader(title = "Criar Cadastro")
+                    FormHeader(title = "Verificar Cadastro")
 
                     QuestionButton(
                         questionText = "Precisa de ajuda?",
                         actionTitle = "Entrar em contato",
                         onClicked = {
-                            sendEvent(SignUpModel.Event.OnContactClicked(navigateTo))
+                            sendEvent(VerifyAccountModel.Event.OnContactClicked(navigateTo))
                         },
                         modifier = Modifier.align(Alignment.End),
                     )
                 }
 
-                Column {
-                    TextFormField(
-                        value = state.fullName,
-                        valueErrorMessage = state.fullNameError,
-                        onValueChanged = {
-                            sendEvent(SignUpModel.Event.OnFullNameChanged(it))
-                        },
-                        label = "Nome Completo",
-                        isLoading = state.isLoading,
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Full name icon"
+                Text(
+                    textAlign = TextAlign.Center,
+                    text = buildAnnotatedString {
+                        withStyle(
+                            SpanStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                                color = MaterialTheme.typography.bodyLarge.color,
                             )
-                        }
-                    )
+                        ) { append("Precisamos verificar o email\n") }
+                        withStyle(
+                            SpanStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.primary,
+                                letterSpacing = TextUnit(1.5F, TextUnitType.Sp),
+                            )
+                        ) { append(state.email) }
+                        withStyle(
+                            SpanStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                                color = MaterialTheme.typography.bodyLarge.color,
+                            )
+                        ) { append("\npara confirmar seu cadastro.\nAo continuar, você receberá um email\ncom o código de verificação.") }
+                    }
+                )
 
-                    TextFormField(
-                        value = state.email,
-                        valueErrorMessage = state.emailError,
-                        onValueChanged = {
-                            sendEvent(SignUpModel.Event.OnEmailChanged(it))
-                        },
-                        isLoading = state.isLoading,
-                    )
-
-                    PasswordFormField(
-                        value = state.password,
-                        valueErrorMessage = state.passwordError,
-                        onValueChanged = {
-                            sendEvent(SignUpModel.Event.OnPasswordChanged(it))
-                        },
-                        isValueVisible = state.isPasswordVisible,
-                        onToggleVisibility = {
-                            sendEvent(SignUpModel.Event.OnPasswordVisibilityClicked)
-                        },
-                        isLoading = state.isLoading,
-                    )
-
-                    PasswordFormField(
-                        value = state.passwordConfirmation,
-                        valueErrorMessage = state.passwordConfirmationError,
-                        onValueChanged = {
-                            sendEvent(SignUpModel.Event.OnPasswordConfirmationChanged(it))
-                        },
-                        label = "Confirmação de Senha",
-                        isValueVisible = state.isPasswordVisible,
-                        onToggleVisibility = {
-                            sendEvent(SignUpModel.Event.OnPasswordVisibilityClicked)
-                        },
-                        isLoading = state.isLoading,
-                    )
-
-                    ActionButton(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        onClicked = {
-                            sendEvent(SignUpModel.Event.OnSubmitClicked(navigateTo))
-                        },
-                        isLoading = state.isLoading,
-                        isEnabled = state.isFormValid,
-                    )
-                }
-
-                TermsAndPolicies(
-                    onTermsClicked = {
-                        sendEvent(SignUpModel.Event.OnTermsClicked(navigateTo))
+                ActionButton(
+                    onClicked = {
+                        sendEvent(VerifyAccountModel.Event.OnSubmitClicked(navigateTo))
                     },
-                    onPoliciesClicked = {
-                        sendEvent(SignUpModel.Event.OnPoliciesClicked(navigateTo))
-                    },
+                    isLoading = state.isLoading,
+                    actionTitle = "CONTINUAR"
                 )
 
                 QuestionButton(
-                    questionText = "Já possui cadastro?",
-                    actionTitle = "ENTRAR",
+                    questionText = "Já possui um código?",
+                    actionTitle = "CONFIRMAR",
                     onClicked = {
-                        sendEvent(SignUpModel.Event.OnSignInClicked(navigateTo))
+                        sendEvent(VerifyAccountModel.Event.OnConfirmClicked(navigateTo))
                     },
                     isEnabled = !state.isLoading,
                 )
@@ -197,10 +163,10 @@ fun SignUpViewContent(
 
 @Preview(showSystemUi = true, device = "spec:parent=pixel_3a")
 @Composable
-fun PreviewPhone() {
+fun VerifyPreviewPhone() {
     EllionTheme {
-        SignUpViewContent(
-            state = SignUpModel.State(),
+        VerifyAccountViewContent(
+            state = VerifyAccountModel.State(),
             sendEvent = {},
             navigateTo = {},
         )
@@ -209,10 +175,10 @@ fun PreviewPhone() {
 
 @Preview(showSystemUi = true, device = "spec:parent=Galaxy Nexus,navigation=buttons")
 @Composable
-fun PreviewPhoneSmall() {
+fun VerifyPreviewPhoneSmall() {
     EllionTheme {
-        SignUpViewContent(
-            state = SignUpModel.State(),
+        VerifyAccountViewContent(
+            state = VerifyAccountModel.State(),
             sendEvent = {},
             navigateTo = {},
         )
@@ -221,10 +187,10 @@ fun PreviewPhoneSmall() {
 
 @Preview(device = "spec:parent=Nexus 7 2013,navigation=buttons", showSystemUi = true)
 @Composable
-fun PreviewTabletPortrait() {
+fun VerifyPreviewTabletPortrait() {
     EllionTheme {
-        SignUpViewContent(
-            state = SignUpModel.State(),
+        VerifyAccountViewContent(
+            state = VerifyAccountModel.State(),
             sendEvent = {},
             navigateTo = {},
         )
@@ -233,12 +199,13 @@ fun PreviewTabletPortrait() {
 
 @Preview(device = "spec:parent=Nexus 10,navigation=buttons", showSystemUi = true)
 @Composable
-fun PreviewTabletLandscape() {
+fun VerifyPreviewTabletLandscape() {
     EllionTheme {
-        SignUpViewContent(
-            state = SignUpModel.State(),
+        VerifyAccountViewContent(
+            state = VerifyAccountModel.State(),
             sendEvent = {},
             navigateTo = {},
         )
     }
 }
+

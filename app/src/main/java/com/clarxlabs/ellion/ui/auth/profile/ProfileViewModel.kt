@@ -118,7 +118,7 @@ class ProfileViewModel(
                             )
                         }
                     },
-                    { navigateTo(AppRoute.Verify(state.value.email)) },
+                    { navigateTo(AppRoute.VerifyAccount(state.value.email)) },
                 )
 
             }

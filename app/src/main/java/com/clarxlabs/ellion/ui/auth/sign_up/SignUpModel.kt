@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.signup
+package com.clarxlabs.ellion.ui.auth.sign_up
 
 import com.clarxlabs.ellion.ui.AppModel
 import com.clarxlabs.ellion.ui.AppRoute

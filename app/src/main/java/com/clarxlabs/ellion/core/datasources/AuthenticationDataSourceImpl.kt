@@ -31,13 +31,13 @@ class AuthenticationDataSourceImpl(private val httpClient: HttpClient) : Authent
     override suspend fun signIn(input: SignInInput): Either<SignInError, SignInOutput> {
         return HttpRequestFactory(httpClient)
             .create(HttpMethod.Post, AppAPI.SIGNIN).setBody(input)
-            .execute().let { APIResponse.Companion.toEither(it) }
+            .execute().let { APIResponse.toEither(it) }
     }
 
     override suspend fun signUp(input: SignUpInput): Either<SignUpError, SignUpOutput> =
         HttpRequestFactory(httpClient)
             .create(HttpMethod.Post, AppAPI.SIGNUP).setBody(input)
-            .execute().let { APIResponse.Companion.toEither(it) }
+            .execute().let { APIResponse.toEither(it) }
 
     override suspend fun signOut(input: SignOutInput): Either<SignOutError, SignOutOutput> {
         val queries = mapOf(
@@ -47,7 +47,7 @@ class AuthenticationDataSourceImpl(private val httpClient: HttpClient) : Authent
 
         return HttpRequestFactory(httpClient)
             .create(HttpMethod.Delete, AppAPI.SIGNOUT).setQueries(queries)
-            .execute().let { APIResponse.Companion.toEither(it) }
+            .execute().let { APIResponse.toEither(it) }
     }
 
     override suspend fun verify(input: VerifyInput): Either<VerifyError, VerifyOutput> {
@@ -55,7 +55,7 @@ class AuthenticationDataSourceImpl(private val httpClient: HttpClient) : Authent
 
         return HttpRequestFactory(httpClient)
             .create(HttpMethod.Get, AppAPI.VERIFY).setQueries(queries)
-            .execute().let { APIResponse.Companion.toEither(it) }
+            .execute().let { APIResponse.toEither(it) }
     }
 
     override suspend fun confirm(input: ConfirmInput): Either<ConfirmError, ConfirmOutput> {
@@ -63,7 +63,7 @@ class AuthenticationDataSourceImpl(private val httpClient: HttpClient) : Authent
 
         return HttpRequestFactory(httpClient)
             .create(HttpMethod.Post, AppAPI.CONFIRM).setQueries(queries)
-            .execute().let { APIResponse.Companion.toEither(it) }
+            .execute().let { APIResponse.toEither(it) }
     }
 
     override suspend fun userInfo(input: UserInfoInput): Either<UserInfoError, UserInfoOutput> {
@@ -71,11 +71,11 @@ class AuthenticationDataSourceImpl(private val httpClient: HttpClient) : Authent
 
         return HttpRequestFactory(httpClient)
             .create(HttpMethod.Get, AppAPI.USERINFO).setHeaders(headers)
-            .execute().let { APIResponse.Companion.toEither(it) }
+            .execute().let { APIResponse.toEither(it) }
     }
 
     override suspend fun listUsers(): Either<ListUsersError, ListUsersOutput> =
         HttpRequestFactory(httpClient)
             .create(HttpMethod.Get, AppAPI.LIST_USERS)
-            .execute().let { APIResponse.Companion.toEither(it) }
+            .execute().let { APIResponse.toEither(it) }
 }

@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.signin
+package com.clarxlabs.ellion.ui.auth.sign_up
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -33,17 +36,17 @@ import com.clarxlabs.ellion.ui.components.TextFormField
 import com.clarxlabs.ellion.ui.theme.EllionTheme
 
 @Composable
-fun SignInView(viewModel: SignInViewModel, navigateTo: (AppRoute) -> Unit) {
+fun SignUpView(viewModel: SignUpViewModel, navigateTo: (AppRoute) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val sendEvent = viewModel::sendEvent
 
-    SignInViewContent(state, sendEvent, navigateTo)
+    SignUpViewContent(state, sendEvent, navigateTo)
 }
 
 @Composable
-fun SignInViewContent(
-    state: SignInModel.State,
-    sendEvent: (SignInModel.Event) -> Unit,
+fun SignUpViewContent(
+    state: SignUpModel.State,
+    sendEvent: (SignUpModel.Event) -> Unit,
     navigateTo: (AppRoute) -> Unit,
 ) {
     Surface(
@@ -88,38 +91,40 @@ fun SignInViewContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(vertical = 4.dp)
                 ) {
-                    FormHeader(title = "Acessar Cadastro")
+                    FormHeader(title = "Criar Cadastro")
 
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        QuestionButton(
-                            questionText = "Precisa de ajuda?",
-                            actionTitle = "Entrar em contato",
-                            onClicked = {
-                                sendEvent(SignInModel.Event.OnContactClicked)
-                            },
-                            modifier = Modifier.align(Alignment.End),
-                        )
-                        QuestionButton(
-                            questionText = "Esqueceu sua senha?",
-                            actionTitle = "Recuperar",
-                            onClicked = {
-                                sendEvent(SignInModel.Event.OnResetPasswordClicked)
-                            },
-                            modifier = Modifier.align(Alignment.End),
-                            isEnabled = !state.isLoading,
-                        )
-                    }
+                    QuestionButton(
+                        questionText = "Precisa de ajuda?",
+                        actionTitle = "Entrar em contato",
+                        onClicked = {
+                            sendEvent(SignUpModel.Event.OnContactClicked(navigateTo))
+                        },
+                        modifier = Modifier.align(Alignment.End),
+                    )
                 }
 
                 Column {
                     TextFormField(
+                        value = state.fullName,
+                        valueErrorMessage = state.fullNameError,
+                        onValueChanged = {
+                            sendEvent(SignUpModel.Event.OnFullNameChanged(it))
+                        },
+                        label = "Nome Completo",
+                        isLoading = state.isLoading,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Full name icon"
+                            )
+                        }
+                    )
+
+                    TextFormField(
                         value = state.email,
                         valueErrorMessage = state.emailError,
                         onValueChanged = {
-                            sendEvent(SignInModel.Event.OnEmailChanged(it))
+                            sendEvent(SignUpModel.Event.OnEmailChanged(it))
                         },
                         isLoading = state.isLoading,
                     )
@@ -128,11 +133,25 @@ fun SignInViewContent(
                         value = state.password,
                         valueErrorMessage = state.passwordError,
                         onValueChanged = {
-                            sendEvent(SignInModel.Event.OnPasswordChanged(it))
+                            sendEvent(SignUpModel.Event.OnPasswordChanged(it))
                         },
                         isValueVisible = state.isPasswordVisible,
                         onToggleVisibility = {
-                            sendEvent(SignInModel.Event.OnPasswordVisibilityClicked)
+                            sendEvent(SignUpModel.Event.OnPasswordVisibilityClicked)
+                        },
+                        isLoading = state.isLoading,
+                    )
+
+                    PasswordFormField(
+                        value = state.passwordConfirmation,
+                        valueErrorMessage = state.passwordConfirmationError,
+                        onValueChanged = {
+                            sendEvent(SignUpModel.Event.OnPasswordConfirmationChanged(it))
+                        },
+                        label = "Confirmação de Senha",
+                        isValueVisible = state.isPasswordVisible,
+                        onToggleVisibility = {
+                            sendEvent(SignUpModel.Event.OnPasswordVisibilityClicked)
                         },
                         isLoading = state.isLoading,
                     )
@@ -140,27 +159,20 @@ fun SignInViewContent(
                     ActionButton(
                         modifier = Modifier.padding(vertical = 8.dp),
                         onClicked = {
-                            sendEvent(SignInModel.Event.OnSubmitClicked(navigateTo))
+                            sendEvent(SignUpModel.Event.OnSubmitClicked(navigateTo))
                         },
                         isLoading = state.isLoading,
                         isEnabled = state.isFormValid,
                     )
                 }
 
-                TermsAndPolicies(
-                    onTermsClicked = {
-                        sendEvent(SignInModel.Event.OnTermsClicked(navigateTo))
-                    },
-                    onPoliciesClicked = {
-                        sendEvent(SignInModel.Event.OnPoliciesClicked(navigateTo))
-                    },
-                )
+                TermsAndPolicies()
 
                 QuestionButton(
-                    questionText = "Não possui cadastro?",
-                    actionTitle = "CADASTRAR",
+                    questionText = "Já possui cadastro?",
+                    actionTitle = "ENTRAR",
                     onClicked = {
-                        sendEvent(SignInModel.Event.OnSignUpClicked(navigateTo))
+                        sendEvent(SignUpModel.Event.OnSignInClicked(navigateTo))
                     },
                     isEnabled = !state.isLoading,
                 )
@@ -175,12 +187,13 @@ fun SignInViewContent(
     }
 }
 
+
 @Preview(showSystemUi = true, device = "spec:parent=pixel_3a")
 @Composable
-fun PreviewPhone() {
+fun SignUpPreviewPhone() {
     EllionTheme {
-        SignInViewContent(
-            state = SignInModel.State(email = "alice@wonderland.co"),
+        SignUpViewContent(
+            state = SignUpModel.State(),
             sendEvent = {},
             navigateTo = {},
         )
@@ -189,10 +202,10 @@ fun PreviewPhone() {
 
 @Preview(showSystemUi = true, device = "spec:parent=Galaxy Nexus,navigation=buttons")
 @Composable
-fun PreviewPhoneSmall() {
+fun SignUpPreviewPhoneSmall() {
     EllionTheme {
-        SignInViewContent(
-            state = SignInModel.State(email = "alice@wonderland.co"),
+        SignUpViewContent(
+            state = SignUpModel.State(),
             sendEvent = {},
             navigateTo = {},
         )
@@ -201,10 +214,10 @@ fun PreviewPhoneSmall() {
 
 @Preview(device = "spec:parent=Nexus 7 2013,navigation=buttons", showSystemUi = true)
 @Composable
-fun PreviewTabletPortrait() {
+fun SignUpPreviewTabletPortrait() {
     EllionTheme {
-        SignInViewContent(
-            state = SignInModel.State(email = "alice@wonderland.co"),
+        SignUpViewContent(
+            state = SignUpModel.State(),
             sendEvent = {},
             navigateTo = {},
         )
@@ -213,10 +226,10 @@ fun PreviewTabletPortrait() {
 
 @Preview(device = "spec:parent=Nexus 10,navigation=buttons", showSystemUi = true)
 @Composable
-fun PreviewTabletLandscape() {
+fun SignUpPreviewTabletLandscape() {
     EllionTheme {
-        SignInViewContent(
-            state = SignInModel.State(email = "alice@wonderland.co"),
+        SignUpViewContent(
+            state = SignUpModel.State(),
             sendEvent = {},
             navigateTo = {},
         )

@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.verify
+package com.clarxlabs.ellion.ui.auth.verify_account
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.toRoute
@@ -6,15 +6,19 @@ import com.clarxlabs.ellion.ui.AppModel
 import com.clarxlabs.ellion.ui.AppRoute
 import kotlinx.serialization.Serializable
 
-sealed interface VerifyModel : AppModel {
+enum class VerificationType { CONFIRM_ACCOUNT, RESET_PASSWORD, CHANGE_EMAIL }
+
+sealed interface VerifyAccountModel : AppModel {
     @Serializable
     data class State(
         val email: String = "invalid@mail.com",
+        val verificationType: VerificationType = VerificationType.CONFIRM_ACCOUNT,
 
         val isLoading: Boolean = false,
     ) : AppModel.State {
         constructor(handle: SavedStateHandle) : this(
-            email = handle.toRoute<AppRoute.Confirm>().email
+            email = handle.toRoute<AppRoute.VerifyAccount>().email,
+            verificationType = handle.toRoute<AppRoute.VerifyAccount>().verificationType
         )
     }
 

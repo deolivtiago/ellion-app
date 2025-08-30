@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.signin
+package com.clarxlabs.ellion.ui.auth.sign_in
 
 import androidx.lifecycle.viewModelScope
 import com.clarxlabs.ellion.core.repositories.AuthenticationRepository
@@ -10,6 +10,7 @@ import com.clarxlabs.ellion.core.services.validation.TextFieldValidation
 import com.clarxlabs.ellion.core.services.validation.TextFieldValidation.Strategy
 import com.clarxlabs.ellion.ui.AppRoute
 import com.clarxlabs.ellion.ui.AppViewModel
+import com.clarxlabs.ellion.ui.auth.verify_account.VerificationType
 import it.czerwinski.kotlin.util.Either
 import kotlinx.coroutines.launch
 
@@ -27,7 +28,7 @@ class SignInViewModel(
             is SignInModel.Event.OnEmailChanged -> onEmailChanged(event.email.trim())
             is SignInModel.Event.OnPasswordChanged -> onPasswordChanged(event.password.trim())
             is SignInModel.Event.OnPasswordVisibilityClicked -> onPasswordVisibilityChanged()
-            is SignInModel.Event.OnResetPasswordClicked -> onResetPasswordClicked()
+            is SignInModel.Event.OnResetPasswordClicked -> onResetPasswordClicked(event.navigateTo)
             is SignInModel.Event.OnSignUpClicked -> onSignUpClicked(event.navigateTo)
             is SignInModel.Event.OnContactClicked -> onContactClicked()
             is SignInModel.Event.OnSubmitClicked -> onSubmitClicked(event.navigateTo)
@@ -54,7 +55,12 @@ class SignInViewModel(
                 it.fold(
                     { error ->
                         if (error.email.contains("must be verified"))
-                            navigateTo(AppRoute.Verify(state.value.email))
+                            navigateTo(
+                                AppRoute.VerifyAccount(
+                                    email = state.value.email,
+                                    verificationType = VerificationType.CONFIRM_ACCOUNT,
+                                )
+                            )
                         else setState {
                             it.copy(
                                 emailError = error.email.first(),
@@ -79,8 +85,15 @@ class SignInViewModel(
         navigateTo(AppRoute.SignUp)
     }
 
-    private fun onResetPasswordClicked() {
+    private fun onResetPasswordClicked(navigateTo: (AppRoute) -> Unit) {
         setState { it.copy(isPasswordVisible = false) }
+
+        navigateTo(
+            AppRoute.VerifyAccount(
+                email = state.value.email,
+                verificationType = VerificationType.RESET_PASSWORD,
+            )
+        )
     }
 
     private fun onPasswordVisibilityChanged() {

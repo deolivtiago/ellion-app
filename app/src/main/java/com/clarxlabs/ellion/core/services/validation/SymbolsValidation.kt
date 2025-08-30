@@ -19,6 +19,6 @@ class SymbolsValidation(
     }
 
     sealed interface Error : TextValidation.Error {
-        data class AtLeast(val min: Int, val permitted: String) : Error
+        data class AtLeast(val min: Int, val permitted: String = ".!?@#%^&*_+-$,") : Error
     }
 }

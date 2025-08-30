@@ -13,16 +13,18 @@ import com.clarxlabs.ellion.core.repositories.AuthenticationRepositoryImpl
 import com.clarxlabs.ellion.core.services.ValidationService
 import com.clarxlabs.ellion.core.services.ValidationServiceImpl
 import com.clarxlabs.ellion.ui.AppRoute
-import com.clarxlabs.ellion.ui.auth.confirm.ConfirmView
-import com.clarxlabs.ellion.ui.auth.confirm.ConfirmViewModel
+import com.clarxlabs.ellion.ui.auth.confirm_account.ConfirmAccountView
+import com.clarxlabs.ellion.ui.auth.confirm_account.ConfirmAccountViewModel
 import com.clarxlabs.ellion.ui.auth.profile.ProfileView
 import com.clarxlabs.ellion.ui.auth.profile.ProfileViewModel
-import com.clarxlabs.ellion.ui.auth.signin.SignInView
-import com.clarxlabs.ellion.ui.auth.signin.SignInViewModel
-import com.clarxlabs.ellion.ui.auth.signup.SignUpView
-import com.clarxlabs.ellion.ui.auth.signup.SignUpViewModel
-import com.clarxlabs.ellion.ui.auth.verify.VerifyView
-import com.clarxlabs.ellion.ui.auth.verify.VerifyViewModel
+import com.clarxlabs.ellion.ui.auth.reset_password.ResetPasswordView
+import com.clarxlabs.ellion.ui.auth.reset_password.ResetPasswordViewModel
+import com.clarxlabs.ellion.ui.auth.sign_in.SignInView
+import com.clarxlabs.ellion.ui.auth.sign_in.SignInViewModel
+import com.clarxlabs.ellion.ui.auth.sign_up.SignUpView
+import com.clarxlabs.ellion.ui.auth.sign_up.SignUpViewModel
+import com.clarxlabs.ellion.ui.auth.verify_account.VerifyAccountView
+import com.clarxlabs.ellion.ui.auth.verify_account.VerifyAccountViewModel
 import com.clarxlabs.ellion.ui.home.HomeView
 import com.clarxlabs.ellion.ui.home.HomeViewModel
 import com.clarxlabs.ellion.ui.theme.EllionTheme
@@ -47,8 +49,9 @@ fun MainApplication() {
 
         viewModelOf(::SignInViewModel)
         viewModelOf(::SignUpViewModel)
-        viewModelOf(::VerifyViewModel)
-        viewModelOf(::ConfirmViewModel)
+        viewModelOf(::VerifyAccountViewModel)
+        viewModelOf(::ConfirmAccountViewModel)
+        viewModelOf(::ResetPasswordViewModel)
         viewModelOf(::HomeViewModel)
         viewModelOf(::ProfileViewModel)
         viewModelOf(::ListViewModel)
@@ -71,16 +74,22 @@ fun MainApplication() {
                             navigateTo = navController::navigate,
                         )
                     }
-                    composable<AppRoute.Verify> {
-                        VerifyView(
+                    composable<AppRoute.VerifyAccount> {
+                        VerifyAccountView(
                             viewModel = koinViewModel(),
-                            onNavigate = navController::navigate,
+                            navigateTo = navController::navigate,
                         )
                     }
-                    composable<AppRoute.Confirm> {
-                        ConfirmView(
+                    composable<AppRoute.ConfirmAccount> {
+                        ConfirmAccountView(
                             viewModel = koinViewModel(),
-                            onNavigate = navController::navigate,
+                            navigateTo = navController::navigate,
+                        )
+                    }
+                    composable<AppRoute.ResetPassword> {
+                        ResetPasswordView(
+                            viewModel = koinViewModel(),
+                            navigateTo = navController::navigate,
                         )
                     }
                     composable<AppRoute.Home> {

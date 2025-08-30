@@ -1,4 +1,4 @@
-package com.clarxlabs.ellion.ui.auth.confirm
+package com.clarxlabs.ellion.ui.auth.reset_password
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Password
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,22 +39,24 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.clarxlabs.ellion.ui.AppRoute
 import com.clarxlabs.ellion.ui.components.ActionButton
 import com.clarxlabs.ellion.ui.components.FormHeader
+import com.clarxlabs.ellion.ui.components.PasswordFormField
 import com.clarxlabs.ellion.ui.components.QuestionButton
+import com.clarxlabs.ellion.ui.components.TextFormField
 import com.clarxlabs.ellion.ui.theme.EllionTheme
 
 @Composable
-fun ConfirmView(viewModel: ConfirmViewModel, onNavigate: (AppRoute) -> Unit) {
+fun ResetPasswordView(viewModel: ResetPasswordViewModel, navigateTo: (AppRoute) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val onEvent = viewModel::sendEvent
+    val sendEvent = viewModel::sendEvent
 
-    ConfirmViewContent(state, onEvent, onNavigate)
+    ResetPasswordViewContent(state, sendEvent, navigateTo)
 }
 
 @Composable
-fun ConfirmViewContent(
-    state: ConfirmModel.State,
-    onEvent: (ConfirmModel.Event) -> Unit,
-    onNavigate: (AppRoute) -> Unit,
+private fun ResetPasswordViewContent(
+    state: ResetPasswordModel.State = ResetPasswordModel.State(),
+    sendEvent: (ResetPasswordModel.Event) -> Unit = {},
+    navigateTo: (AppRoute) -> Unit = {},
 ) {
     Surface(
         modifier = Modifier
@@ -99,12 +100,14 @@ fun ConfirmViewContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(vertical = 4.dp)
                 ) {
-                    FormHeader(title = "Confirmar Email")
+                    FormHeader(title = "Cadastrar Senha")
 
                     QuestionButton(
                         questionText = "Precisa de ajuda?",
                         actionTitle = "Entrar em contato",
-                        onClicked = { onEvent(ConfirmModel.Event.OnContactClicked(onNavigate)) },
+                        onClicked = {
+                            sendEvent(ResetPasswordModel.Event.OnContactClicked(navigateTo))
+                        },
                         modifier = Modifier.align(Alignment.End),
                     )
                 }
@@ -133,48 +136,70 @@ fun ConfirmViewContent(
                                 fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
                                 color = MaterialTheme.typography.bodyLarge.color,
                             )
-                        ) { append("\ne informe abaixo o código de verificação\nenviado para confirmação de cadastro.") }
+                        ) { append("\ne informe abaixo o código de verificação\nrecebido para cadastrar a nova senha.") }
                     }
                 )
 
-                OutlinedTextField(
-                    value = state.code,
-                    onValueChange = { onEvent(ConfirmModel.Event.OnCodeChanged(it)) },
-                    label = { Text("Código de Verificação") },
-                    shape = MaterialTheme.shapes.large,
-                    enabled = !state.isLoading,
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Password,
-                            contentDescription = "Verification code icon"
-                        )
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = { onEvent(ConfirmModel.Event.OnCodeChanged("")) },
-                            enabled = !state.isLoading,
-                        ) {
+                Column {
+                    TextFormField(
+                        value = state.code,
+                        onValueChanged = {
+                            sendEvent(ResetPasswordModel.Event.OnCodeChanged(it))
+                        },
+                        label = "Código de Verificação",
+                        isEnabled = !state.isLoading,
+                        trailingIcon = {
+                            IconButton(
+                                onClick = {
+                                    sendEvent(ResetPasswordModel.Event.OnCodeChanged(""))
+                                },
+                                enabled = !state.isLoading,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Cancel,
+                                    contentDescription = "Code text reset",
+                                )
+                            }
+                        },
+                        leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.Cancel,
-                                contentDescription = "Code text reset",
+                                imageVector = Icons.Default.Password,
+                                contentDescription = "Verification code icon"
                             )
                         }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(2.dp),
-                )
+                    )
 
-                ActionButton(
-                    onClicked = { onEvent(ConfirmModel.Event.OnSubmitClicked(onNavigate)) },
-                    isLoading = state.isLoading,
-                    actionTitle = "CONFIRMAR",
-                )
+                    PasswordFormField(
+                        value = state.password,
+                        valueErrorMessage = state.passwordError,
+                        onValueChanged = {
+                            sendEvent(ResetPasswordModel.Event.OnPasswordChanged(it))
+                        },
+                        label = "Nova senha",
+                        isValueVisible = state.isPasswordVisible,
+                        onToggleVisibility = {
+                            sendEvent(ResetPasswordModel.Event.OnTogglePasswordVisibility)
+                        },
+                        isLoading = state.isLoading,
+                    )
+
+                    ActionButton(
+                        actionTitle = "CONFIRMAR",
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        onClicked = {
+                            sendEvent(ResetPasswordModel.Event.OnSubmitClicked(navigateTo))
+                        },
+                        isLoading = state.isLoading,
+                        isEnabled = state.isFormValid,
+                    )
+                }
 
                 QuestionButton(
                     questionText = "Precisa de um novo código?",
                     actionTitle = "REENVIAR",
-                    onClicked = { onEvent(ConfirmModel.Event.OnSendCodeClicked(onNavigate)) },
+                    onClicked = {
+                        sendEvent(ResetPasswordModel.Event.OnSendCodeClicked(navigateTo))
+                    },
                     isEnabled = !state.isLoading,
                 )
             }
@@ -188,14 +213,27 @@ fun ConfirmViewContent(
     }
 }
 
-@Preview(device = "spec:parent=small_phone,navigation=buttons", showSystemUi = true)
+
+@Preview(showSystemUi = true, device = "spec:parent=pixel_3a")
 @Composable
-private fun ConfirmViewContentPreview() {
-    EllionTheme {
-        ConfirmViewContent(
-            state = ConfirmModel.State(),
-            onEvent = {},
-            onNavigate = {},
-        )
-    }
+fun ResetPasswordPreviewPhone() {
+    EllionTheme { ResetPasswordViewContent() }
+}
+
+@Preview(showSystemUi = true, device = "spec:parent=Galaxy Nexus,navigation=buttons")
+@Composable
+fun ResetPasswordPreviewPhoneSmall() {
+    EllionTheme { ResetPasswordViewContent() }
+}
+
+@Preview(device = "spec:parent=Nexus 7 2013,navigation=buttons", showSystemUi = true)
+@Composable
+fun ResetPasswordPreviewTabletPortrait() {
+    EllionTheme { ResetPasswordViewContent() }
+}
+
+@Preview(device = "spec:parent=Nexus 10,navigation=buttons", showSystemUi = true)
+@Composable
+fun ResetPasswordPreviewTabletLandscape() {
+    EllionTheme { ResetPasswordViewContent() }
 }

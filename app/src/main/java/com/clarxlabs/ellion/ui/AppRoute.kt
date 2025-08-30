@@ -1,5 +1,6 @@
 package com.clarxlabs.ellion.ui
 
+import com.clarxlabs.ellion.ui.auth.verify_account.VerificationType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -14,10 +15,16 @@ sealed interface AppRoute {
     data object SignUp : AppRoute
 
     @Serializable
-    data class Verify(val email: String = "") : AppRoute
+    data class VerifyAccount(
+        val email: String = "",
+        val verificationType: VerificationType = VerificationType.CONFIRM_ACCOUNT,
+    ) : AppRoute
 
     @Serializable
-    data class Confirm(val email: String = "") : AppRoute
+    data class ConfirmAccount(val email: String = "") : AppRoute
+
+    @Serializable
+    data class ResetPassword(val email: String = "") : AppRoute
 
     @Serializable
     data class Home(val accessToken: String = "", val refreshToken: String = "") : AppRoute

@@ -26,6 +26,10 @@ sealed interface APIResponse<out T> {
                     it.body<R>().let(::Right)
                 }
 
+                in 402..404 -> {
+                    it.body<L>().let(::Left)
+                }
+
                 in 422..422 -> {
                     it.body<Error<L>>().errors.let(::Left)
                 }
